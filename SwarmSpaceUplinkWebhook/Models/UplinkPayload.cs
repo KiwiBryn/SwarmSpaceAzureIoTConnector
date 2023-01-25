@@ -67,12 +67,12 @@ namespace devmobile.IoT.SwarmConnector.SwarmSpace.UplinkWebhook.Models
 
         [Required]
         [JsonProperty("data")]
-        public string Data { get; set; }
+        public string Data { get; set; } = String.Empty;
 
         [Required]
-        [JsonProperty("len")]
+        [JsonProperty("Len")]
         [Range(Constants.PayloadLengthMinimum, Constants.PayloadLengthMaximum, ErrorMessage = "UplinkPayload value for {0} must be between {1} and {2}")]
-        public byte Len { get; set; }
+        public byte Length { get; set; }
 
         [Required]
         [JsonProperty("status")]

@@ -28,9 +28,10 @@ namespace devmobile.IoT.SwarmConnector.SwarmSpace.UplinkWebhook
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers();
-            builder.Services.AddApplicationInsightsTelemetry(i => i.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsights"));
+            builder.Services.AddControllers().AddNewtonsoftJson();
 
+            builder.Services.AddApplicationInsightsTelemetry(i => i.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsights"));
+            
             builder.Services.Configure<Models.ApplicationSettings>(builder.Configuration.GetSection("Application"));
 
             builder.Services.AddAzureClients(azureClient =>
