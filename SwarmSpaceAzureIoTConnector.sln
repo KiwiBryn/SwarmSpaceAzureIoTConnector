@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwarmSpaceUplinkWebhook", "SwarmSpaceUplinkWebhook\SwarmSpaceUplinkWebhook.csproj", "{BA04BA99-6814-411F-8C37-5FFD9C5652A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwarmSpaceAzureIoTConnector", "SwarmSpaceAzureIoTConnector\SwarmSpaceAzureIoTConnector.csproj", "{C3DCFFE8-5EC9-411E-B1F2-1829B675B5C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BA04BA99-6814-411F-8C37-5FFD9C5652A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA04BA99-6814-411F-8C37-5FFD9C5652A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA04BA99-6814-411F-8C37-5FFD9C5652A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3DCFFE8-5EC9-411E-B1F2-1829B675B5C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3DCFFE8-5EC9-411E-B1F2-1829B675B5C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3DCFFE8-5EC9-411E-B1F2-1829B675B5C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3DCFFE8-5EC9-411E-B1F2-1829B675B5C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
