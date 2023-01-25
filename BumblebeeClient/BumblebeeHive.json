@@ -1,0 +1,1903 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hive Service REST API",
+    "version": "v1"
+  },
+  "servers": [ { "url": "/hive" } ],
+  "security": [
+    { "cookieAuth": [] },
+    { "bearerTokenAuth": [] }
+  ],
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication: logging in and out of Hive"
+    },
+    {
+      "name": "users",
+      "description": "Get and update user info"
+    },
+    {
+      "name": "devices",
+      "description": "Get and manage devices on the Swarm network"
+    },
+    {
+      "name": "telemetry",
+      "description": "Get telemetry for devices"
+    },
+    {
+      "name": "user context",
+      "description": "Get user context"
+    },
+    {
+      "name": "messages",
+      "description": "Sending and retrieving user messages"
+    },
+    {
+      "name": "organizations",
+      "description": "Get and update organization info."
+    }
+  ],
+  "paths": {
+    "/api/v1/devices/metadata/{deviceType}/{deviceId}": {
+      "put": {
+        "tags": [ "devices" ],
+        "summary": "PUT device metadata",
+        "description": "Modify metadata for a device.",
+        "operationId": "putDeviceMetadata",
+        "parameters": [
+          {
+            "name": "deviceType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeviceMetadataUpdateJson" } } },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/StatusJson" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/users/me/password": {
+      "post": {
+        "tags": [ "users" ],
+        "summary": "POST update password",
+        "description": "Updates the password for the current user given their old password.",
+        "operationId": "updatePassword",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PasswordChangeRequestJson" } } },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "204": { "description": "No Content" }
+        }
+      }
+    },
+    "/api/v1/users/me/info": {
+      "get": {
+        "tags": [ "users" ],
+        "summary": "GET my account info",
+        "description": "Get a JSON of the account info for the current user.",
+        "operationId": "getInfo",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/WebUser" } } }
+          }
+        },
+        "deprecated": true
+      },
+      "post": {
+        "tags": [ "users" ],
+        "summary": "POST my account info",
+        "description": "Update, via JSON, the account info for the current user.",
+        "operationId": "updateInfo",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserInfoChangeRequestJson" } } },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/WebUser" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/messages": {
+      "get": {
+        "tags": [ "messages" ],
+        "summary": "GET user messages",
+        "description": "This endpoint requests a JSON formatted array of messages which are filtered by the parameters. Only returns messages from the last 30 days.<br/>Note: If a packetid is specified, all other filters will be ignored, and the message with that packetid will always be returned unless it's more than 30 days old.",
+        "operationId": "getMessages",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "query",
+            "description": "Numeric Organization ID.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userApplicationId",
+            "in": "query",
+            "description": "Numeric User Application ID.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "devicetype",
+            "in": "query",
+            "description": "Numeric Swarm device type.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "deviceid",
+            "in": "query",
+            "description": "Numeric Swarm device ID.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "devicename",
+            "in": "query",
+            "description": "Swarm device name. Deprecated and no longer used to filter messages. Use devicetype and deviceid instead.",
+            "required": false,
+            "deprecated": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "viadeviceid",
+            "in": "query",
+            "description": "Numeric Swarm firsthop groundstation device ID. Use -1 for last known nexthop for this device.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Result count requested. Default is 100. Max is 1000.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Numeric filter for message status. Use value of 0 for unacknowledged (not yet processed by user), 2 for acknowledged. Default is 0. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "beforepacketid",
+            "in": "query",
+            "description": "Used for pagination. Pass the last packet ID from the previous page. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "packetid",
+            "in": "query",
+            "description": "Numeric filter for packet ID.  Returns single message matching packet ID. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Filter for direction of travel.  Use \"fromdevice\" for messages received from Swarm devices, \"todevice\" for messages sent to Swarm devices, \"all\" for both. Default is \"fromdevice\". Optional.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date filter as UTC ISO 8601. Must be within the last 30 days. Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date filter as UTC ISO 8601. Must be within the last 30 days. Must be after startDate. Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserMessage" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [ "messages" ],
+        "summary": "POST user messages",
+        "description": "<p>This endpoint submits a JSON formatted UserMessage object for delivery to a Swarm device. A JSON object is returned with a newly assigned <code>packetId</code> and <code>status</code> of<code>OK</code> on success, or <code>ERROR</code> (with a description of the error) on failure.</p><p>The current user must have access to the <code>userApplicationId</code> and <code>device</code> given inside the UserMessage JSON. The device must also have the ability to receive messages from the Hive (\"two-way communication\") enabled. If these conditions are not met, a response with status code 403 (Forbidden) will be returned.</p><p>Note that the <code>data</code> field is the <b>Base64-encoded</b> version of the data to be sent. This allows the sending of binary, as well as text, data.</p>",
+        "operationId": "addApplicationMessage",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserMessage" } } },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PacketPostReturn" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/messages/rxack/{packetId}": {
+      "post": {
+        "tags": [ "messages" ],
+        "summary": "Acknowledge receipt of a user message. ",
+        "description": "This endpoint acknowledges receipt of a user message. Path variable {packetId} is required. A JSON object is returned with the new \"packetId\" and \"status\" of \"OK\" for success or \"ERROR\" for failure.",
+        "operationId": "ackRxMessage",
+        "parameters": [
+          {
+            "name": "packetId",
+            "in": "path",
+            "description": "Numeric packet ID. Required.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Set numeric message status. Use value of 0 for received, 2 for acknowledged. Default is 2. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PacketPostReturn" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/devices/register": {
+      "post": {
+        "tags": [ "devices" ],
+        "summary": "POST register device",
+        "description": "Register a field device using its auth code. Returns the registered device.",
+        "operationId": "registerDevice",
+        "parameters": [
+          {
+            "name": "authCode",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Device" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/devices/deregister": {
+      "post": {
+        "tags": [ "devices" ],
+        "summary": "POST deregister device",
+        "description": "Deregister a field device using its auth code or ID.",
+        "operationId": "deregisterDevice",
+        "parameters": [
+          {
+            "name": "authCode",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/StatusJson" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/devices/deactivate": {
+      "post": {
+        "tags": [ "devices" ],
+        "summary": "POST deactivate device",
+        "description": "Deprecated: use POST /hive/api/v1/devices/deregister instead. Deregister a field device using its auth code or ID.",
+        "operationId": "deactivateDevice",
+        "parameters": [
+          {
+            "name": "authCode",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/StatusJson" } } }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/devices/activate": {
+      "post": {
+        "tags": [ "devices" ],
+        "summary": "POST activate device",
+        "description": "Deprecated: use POST /hive/api/v1/devices/register instead. Register a field device using its auth code. Returns the registered device.",
+        "operationId": "activateDevice",
+        "parameters": [
+          {
+            "name": "authCode",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Device" } } }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/organizations/{orgId}": {
+      "get": {
+        "tags": [ "organizations" ],
+        "summary": "GET organization by id",
+        "operationId": "getOrganizationById",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Organization" } } }
+          }
+        }
+      },
+      "patch": {
+        "tags": [ "organizations" ],
+        "summary": "PATCH organization",
+        "description": "Edit an organization. Only the provided properties will be changed.",
+        "operationId": "patchOrganization",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrganizationUpdateJson" } } },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Organization" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/usercontext": {
+      "get": {
+        "tags": [ "user context" ],
+        "summary": "GET user context",
+        "description": "Get a the user context for the current user.",
+        "operationId": "getUserContext",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserContext" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/telemetry/devices": {
+      "get": {
+        "tags": [ "telemetry" ],
+        "summary": "GET telemetry packets",
+        "description": "Get a JSON array of rfPacketTelemetry matching the given parameters.",
+        "operationId": "getTelemetry",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "query",
+            "description": "Numeric Organization ID.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "srcDeviceType",
+            "in": "query",
+            "description": "Filters to telemetry from devices of this type. Required.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "srcDeviceId",
+            "in": "query",
+            "description": "Filters to telemetry from devices of this id. Required.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startTime",
+            "in": "query",
+            "description": "Filters to telemetry at a time at or after (>=) startTime (ISO 8601 format, UTC time zone). Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endTime",
+            "in": "query",
+            "description": "Filters to telemetry at a time strictly before (<) endTime (ISO 8601 format, UTC time zone). Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Return at most <count> telemetries. Default value 100. Max value 500. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          },
+          {
+            "name": "sortAsc",
+            "in": "query",
+            "description": "True to sort ascending by telemetryAt, false to sort descending. False by default. Optional.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/RFPacketTelemetryPublic" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/telemetry/devices/latest": {
+      "get": {
+        "tags": [ "telemetry" ],
+        "summary": "GET telemetry packets",
+        "description": "Get a JSON array of rfPacketTelemetry matching the given parameters.",
+        "operationId": "getLatestTelemetry",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "query",
+            "description": "Numeric Organization ID.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startTime",
+            "in": "query",
+            "description": "Filters to telemetry at a time at or after (>=) startTime (ISO 8601 format, UTC time zone). Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endTime",
+            "in": "query",
+            "description": "Filters to telemetry at a time strictly before (<) endTime (ISO 8601 format, UTC time zone). Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/RFPacketTelemetryPublic" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/messages/{userApplicationId}/rxack/{packetId}": {
+      "get": {
+        "tags": [ "messages" ],
+        "summary": "Acknowledge receipt of UserMessage via GET. ",
+        "description": "This endpoint acknowledges receipt of a user application message (UserMessage).  Path variables {userApplicationId} and {packetId} are required. A JSON object is returned with the new \"packetId\" and \"status\" of \"OK\" for success or \"ERROR\" for failure.",
+        "operationId": "ackRxMessageOld",
+        "parameters": [
+          {
+            "name": "userApplicationId",
+            "in": "path",
+            "description": "Numeric User Application ID. Ignored.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "packetId",
+            "in": "path",
+            "description": "Numeric packet ID.  Required.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Set numeric message status.  Use value of 0 for received, 2 for acknowledged. Default is 2. Optional",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "enum": [ "application/json" ]
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PacketPostReturn" } } }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/messages/{organizationId}": {
+      "get": {
+        "tags": [ "messages" ],
+        "summary": "GET user messages by organization ID",
+        "description": "This endpoint requests a JSON formatted array of messages which are filtered by the parameters. Only returns messages from the last 30 days.",
+        "operationId": "getMessagesByOrganizationId",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "description": "Provided for backwards compatibility with application ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userApplicationId",
+            "in": "query",
+            "description": "Numeric User Application ID.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "devicetype",
+            "in": "query",
+            "description": "Numeric Swarm device type.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "deviceid",
+            "in": "query",
+            "description": "Numeric Swarm device ID.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "devicename",
+            "in": "query",
+            "description": "Swarm device name. Deprecated and no longer used to filter messages. Use devicetype and deviceid instead.",
+            "required": false,
+            "deprecated": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "viadeviceid",
+            "in": "query",
+            "description": "Numeric Swarm firsthop groundstation device ID. Use -1 for last known nexthop for this device.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Result count requested. Default is 100. Max is 1000.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Numeric filter for message status. Use value of 0 for unacknowledged (not yet processed by user), 2 for acknowledged. Default is 0. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "beforepacketid",
+            "in": "query",
+            "description": "Used for pagination. Pass the last packet ID from the previous page. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "packetid",
+            "in": "query",
+            "description": "Numeric filter for packet ID.  Returns single message matching packet ID. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Filter for direction of travel.  Use \"fromdevice\" for messages received from Swarm devices or \"todevice\" for messages sent to Swarm devices. Default is \"fromdevice\". Optional.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date filter as UTC ISO 8601. Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date filter as UTC ISO 8601. Must be after startDate. Optional.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserMessage" }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/messages/details/{messageId}": {
+      "get": {
+        "tags": [ "messages" ],
+        "summary": "GET user message by message id",
+        "description": "This endpoint requests details, including retry attempts, for a message with the given message id. Only returns messages that have been sent in the last 30 days,though previous attempts to send the message from before 30 days ago may be included.",
+        "operationId": "getMessages_1",
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "description": "Message ID to get details for.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "organizationId",
+            "in": "query",
+            "description": "Organization ID. Optional.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserMessageDetails" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/messages/count": {
+      "get": {
+        "tags": [ "messages" ],
+        "summary": "GET total count of messages sent through the network by the current user.",
+        "description": "Gets the count of messages associated with userApplicationIds. Counts messages both received (from edge devices) and sent (to edge devices) through the Swarm network. Ignores messages marked as duplicate messages.",
+        "operationId": "getMessageCount",
+        "parameters": [
+          {
+            "name": "startTime",
+            "in": "query",
+            "description": "Filters to messages which are received by the Hive at a time at or after (>=) startTime (ISO 8601 format, UTC time zone). Optional, default is all available data.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "endTime",
+            "in": "query",
+            "description": "Filters to messages which are received by the Hive at a time strictly before (<) endTime (ISO 8601 format, UTC time zone). Optional, default is all available data.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "deviceType",
+            "in": "query",
+            "description": "This parameter is deprecated and will be ignored if present.",
+            "required": false,
+            "deprecated": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MessageCountByApplicationIdJson" } } }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/devices": {
+      "get": {
+        "tags": [ "devices" ],
+        "summary": "GET devices",
+        "description": "<p>Get a JSON array of devices visible to the user, filtered by the parameters.</p><p>Recommended use cases:</p><li>Get all user devices</li><li>Get by devicetype</li><li>Get by devicetype and deviceid</li><li>Get by devicename</li><li>Get by deviceuuid</li></ul><p>Note that getting by multiple fields will try to filter by <strong>all</strong> of those fields. For example, trying to get by devicetype + devicename could return no results if the device with the given name doesn't have the given type.</p>",
+        "operationId": "getDevices",
+        "parameters": [
+          {
+            "name": "devicetype",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "deviceid",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "devicename",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "deviceuuid",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "authCode",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "applicationid",
+            "in": "query",
+            "required": false,
+            "deprecated": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "organizationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortDesc",
+            "in": "query",
+            "description": "Sort descending by device id if true; sort ascending otherwise. False by default.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Device" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/devices/count": {
+      "get": {
+        "tags": [ "devices" ],
+        "summary": "GET count of devices",
+        "description": "Get a plaintext string of the number of devices visible to the user, filtered by the parameters.",
+        "operationId": "getDeviceCount",
+        "parameters": [
+          {
+            "name": "devicetype",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+          },
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [ "auth" ],
+        "summary": "POST login",
+        "description": "<p>Use username and password to log in.</p><p>On success: returns status code 200. The response body is the JSON <code>{\"token\": \"&lt;token&gt;\"}</code>, along with the header <code>Set-Cookie: JSESSIONID=&lt;token&gt;; Path=/; Secure; HttpOnly;</code>. The tokens in the return value and the <code>Set-Cookie</code> header are the same. The token is a long string of letters, numbers, and punctuation.</p><p>On failure: returns status code 401.</p><p>To make authenticated requests, there are two ways: <ul><li>(Preferred) Use the token as a Bearer Authentication token by including the HTTP header <code>Authorization: Bearer &lt;token&gt;</code> in further requests.</li><li>(Deprecated) Use the token as the JSESSIONID cookie in further requests.</li></ul></p>",
+        "operationId": "postLogin",
+        "requestBody": { "content": { "application/x-www-form-urlencoded": { "schema": { "$ref": "#/components/schemas/LoginForm" } } } },
+        "responses": {
+          "200": {
+            "description": "Login success",
+            "headers": {
+              "Set-Cookie": {
+                "description": "<p>Session cookie to use for authenticating further requests.</p><p>NOTE: When using \"try it out\" on the API documentation page, this header will be omitted from the response headers due to browser security restrictions: see the <a href=\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie\">Set-Cookie</a> documentation for more details.</p><p>In lieu of looking at this header value during testing, simply use the returned token in the response body.</p>",
+                "schema": {
+                  "type": "string",
+                  "example": "JSESSIONID=Very1Long_random.L00King2String; Path=/; HttpOnly"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [ "token" ],
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "Very1Long_random.L00King2String"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Login failure" }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "tags": [ "auth" ],
+        "summary": "GET logout",
+        "description": "Log out of the current session.<p>If user is not logged in (with a valid Bearer authentication token or JSESSIONID cookie), returns 401.</p><p>On success, returns 204 (No Content).</p>",
+        "operationId": "getLogout",
+        "responses": { "204": { "description": "Logout success" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [ "100 CONTINUE", "101 SWITCHING_PROTOCOLS", "102 PROCESSING", "103 CHECKPOINT", "200 OK", "201 CREATED", "202 ACCEPTED", "203 NON_AUTHORITATIVE_INFORMATION", "204 NO_CONTENT", "205 RESET_CONTENT", "206 PARTIAL_CONTENT", "207 MULTI_STATUS", "208 ALREADY_REPORTED", "226 IM_USED", "300 MULTIPLE_CHOICES", "301 MOVED_PERMANENTLY", "302 FOUND", "302 MOVED_TEMPORARILY", "303 SEE_OTHER", "304 NOT_MODIFIED", "305 USE_PROXY", "307 TEMPORARY_REDIRECT", "308 PERMANENT_REDIRECT", "400 BAD_REQUEST", "401 UNAUTHORIZED", "402 PAYMENT_REQUIRED", "403 FORBIDDEN", "404 NOT_FOUND", "405 METHOD_NOT_ALLOWED", "406 NOT_ACCEPTABLE", "407 PROXY_AUTHENTICATION_REQUIRED", "408 REQUEST_TIMEOUT", "409 CONFLICT", "410 GONE", "411 LENGTH_REQUIRED", "412 PRECONDITION_FAILED", "413 PAYLOAD_TOO_LARGE", "413 REQUEST_ENTITY_TOO_LARGE", "414 URI_TOO_LONG", "414 REQUEST_URI_TOO_LONG", "415 UNSUPPORTED_MEDIA_TYPE", "416 REQUESTED_RANGE_NOT_SATISFIABLE", "417 EXPECTATION_FAILED", "418 I_AM_A_TEAPOT", "419 INSUFFICIENT_SPACE_ON_RESOURCE", "420 METHOD_FAILURE", "421 DESTINATION_LOCKED", "422 UNPROCESSABLE_ENTITY", "423 LOCKED", "424 FAILED_DEPENDENCY", "425 TOO_EARLY", "426 UPGRADE_REQUIRED", "428 PRECONDITION_REQUIRED", "429 TOO_MANY_REQUESTS", "431 REQUEST_HEADER_FIELDS_TOO_LARGE", "451 UNAVAILABLE_FOR_LEGAL_REASONS", "500 INTERNAL_SERVER_ERROR", "501 NOT_IMPLEMENTED", "502 BAD_GATEWAY", "503 SERVICE_UNAVAILABLE", "504 GATEWAY_TIMEOUT", "505 HTTP_VERSION_NOT_SUPPORTED", "506 VARIANT_ALSO_NEGOTIATES", "507 INSUFFICIENT_STORAGE", "508 LOOP_DETECTED", "509 BANDWIDTH_LIMIT_EXCEEDED", "510 NOT_EXTENDED", "511 NETWORK_AUTHENTICATION_REQUIRED" ]
+          },
+          "message": { "type": "string" },
+          "debugMessage": { "type": "string" },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DeviceMetadataUpdateJson": {
+        "type": "object",
+        "properties": {
+          "deviceName": {
+            "type": "string",
+            "description": "Device name. By default, looks like F-0x00010 for deviceType = 1 and deviceId = 16"
+          },
+          "comments": {
+            "type": "string",
+            "description": "User comments for device"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Key/value tags for device"
+            },
+            "description": "Key/value tags for device"
+          }
+        }
+      },
+      "StatusJson": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [ "100 CONTINUE", "101 SWITCHING_PROTOCOLS", "102 PROCESSING", "103 CHECKPOINT", "200 OK", "201 CREATED", "202 ACCEPTED", "203 NON_AUTHORITATIVE_INFORMATION", "204 NO_CONTENT", "205 RESET_CONTENT", "206 PARTIAL_CONTENT", "207 MULTI_STATUS", "208 ALREADY_REPORTED", "226 IM_USED", "300 MULTIPLE_CHOICES", "301 MOVED_PERMANENTLY", "302 FOUND", "302 MOVED_TEMPORARILY", "303 SEE_OTHER", "304 NOT_MODIFIED", "305 USE_PROXY", "307 TEMPORARY_REDIRECT", "308 PERMANENT_REDIRECT", "400 BAD_REQUEST", "401 UNAUTHORIZED", "402 PAYMENT_REQUIRED", "403 FORBIDDEN", "404 NOT_FOUND", "405 METHOD_NOT_ALLOWED", "406 NOT_ACCEPTABLE", "407 PROXY_AUTHENTICATION_REQUIRED", "408 REQUEST_TIMEOUT", "409 CONFLICT", "410 GONE", "411 LENGTH_REQUIRED", "412 PRECONDITION_FAILED", "413 PAYLOAD_TOO_LARGE", "413 REQUEST_ENTITY_TOO_LARGE", "414 URI_TOO_LONG", "414 REQUEST_URI_TOO_LONG", "415 UNSUPPORTED_MEDIA_TYPE", "416 REQUESTED_RANGE_NOT_SATISFIABLE", "417 EXPECTATION_FAILED", "418 I_AM_A_TEAPOT", "419 INSUFFICIENT_SPACE_ON_RESOURCE", "420 METHOD_FAILURE", "421 DESTINATION_LOCKED", "422 UNPROCESSABLE_ENTITY", "423 LOCKED", "424 FAILED_DEPENDENCY", "425 TOO_EARLY", "426 UPGRADE_REQUIRED", "428 PRECONDITION_REQUIRED", "429 TOO_MANY_REQUESTS", "431 REQUEST_HEADER_FIELDS_TOO_LARGE", "451 UNAVAILABLE_FOR_LEGAL_REASONS", "500 INTERNAL_SERVER_ERROR", "501 NOT_IMPLEMENTED", "502 BAD_GATEWAY", "503 SERVICE_UNAVAILABLE", "504 GATEWAY_TIMEOUT", "505 HTTP_VERSION_NOT_SUPPORTED", "506 VARIANT_ALSO_NEGOTIATES", "507 INSUFFICIENT_STORAGE", "508 LOOP_DETECTED", "509 BANDWIDTH_LIMIT_EXCEEDED", "510 NOT_EXTENDED", "511 NETWORK_AUTHENTICATION_REQUIRED" ]
+          },
+          "message": { "type": "string" }
+        }
+      },
+      "PasswordChangeRequestJson": {
+        "required": [ "newPassword", "oldPassword" ],
+        "type": "object",
+        "properties": {
+          "oldPassword": { "type": "string" },
+          "newPassword": { "type": "string" }
+        }
+      },
+      "UserInfoChangeRequestJson": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string" },
+          "password": { "type": "string" },
+          "email": { "type": "string" },
+          "country": { "type": "string" }
+        }
+      },
+      "WebUser": {
+        "required": [ "enabled", "organizationId", "registered", "role", "userId", "username" ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": { "type": "string" },
+          "organizationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": { "type": "boolean" },
+          "registered": { "type": "boolean" },
+          "email": { "type": "string" },
+          "country": { "type": "string" },
+          "role": {
+            "type": "string",
+            "enum": [ "SUPER_ADMIN", "ADMIN", "USER", "GROUND_STATION", "TOOLS" ]
+          },
+          "userApplicationId": {
+            "type": "integer",
+            "format": "int32",
+            "deprecated": true
+          }
+        }
+      },
+      "UserMessage": {
+        "required": [ "data", "dataType", "deviceId", "deviceType", "direction", "hiveRxTime", "organizationId", "packetId", "userApplicationId" ],
+        "type": "object",
+        "properties": {
+          "packetId": {
+            "type": "integer",
+            "description": "Swarm packet ID",
+            "format": "int64",
+            "readOnly": true
+          },
+          "messageId": {
+            "type": "integer",
+            "description": "Swarm message ID. There may be multiple messages for a single message ID. A message ID represents an intent to send a message, but there may be multiple Swarm packets that are required to fulfill that intent. For example, if a Hive -> device message fails to reach its destination, automatic retry attempts to send that message will have the same message ID.",
+            "format": "int64",
+            "readOnly": true
+          },
+          "deviceType": {
+            "type": "integer",
+            "description": "Swarm device type",
+            "format": "int32"
+          },
+          "deviceId": {
+            "type": "integer",
+            "description": "Swarm device ID",
+            "format": "int32"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "Swarm device name",
+            "readOnly": true
+          },
+          "direction": {
+            "type": "integer",
+            "description": "Direction of message",
+            "format": "int32"
+          },
+          "dataType": {
+            "type": "integer",
+            "description": "Message data type, always = 6",
+            "format": "int32",
+            "readOnly": true
+          },
+          "userApplicationId": {
+            "type": "integer",
+            "description": "Application ID",
+            "format": "int32"
+          },
+          "organizationId": {
+            "type": "integer",
+            "description": "Organization ID",
+            "format": "int32"
+          },
+          "len": {
+            "type": "integer",
+            "description": "Length of data (in bytes) before base64 encoding",
+            "format": "int32",
+            "readOnly": true
+          },
+          "data": {
+            "type": "string",
+            "description": "Base64 encoded data string",
+            "format": "byte"
+          },
+          "ackPacketId": {
+            "type": "integer",
+            "description": "Swarm packet ID of acknowledging packet from device",
+            "format": "int64",
+            "readOnly": true
+          },
+          "status": {
+            "type": "integer",
+            "description": "Message status. Possible values:\n0 = incoming message (from a device)\n1 = outgoing message (to a device)\n2 = incoming message, acknowledged as seen by customer. OR a outgoing message packet is on groundstation\n3 = outgoing message, packet is on satellite\n-1 = error\n-3 = failed to deliver, retrying\n-4 = failed to deliver, will not re-attempt\n",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hiveRxTime": {
+            "type": "string",
+            "description": "Time that the message was received by the Hive",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "PacketPostReturn": {
+        "required": [ "packetId", "status" ],
+        "type": "object",
+        "properties": {
+          "packetId": {
+            "type": "integer",
+            "description": "Swarm packet ID.",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "description": "Submission status, \"OK\" or \"ERROR\" with a description of the error."
+          }
+        }
+      },
+      "Device": {
+        "required": [ "deviceId", "deviceType", "metadata" ],
+        "type": "object",
+        "properties": {
+          "deviceType": {
+            "type": "integer",
+            "description": "3 bit device type. 1 = fieldBee, 2 = stratoBee, 3 = spaceBee, 4 = groundBee, 5 = Hive",
+            "format": "int32"
+          },
+          "deviceId": {
+            "type": "integer",
+            "description": "18 bit device id",
+            "format": "int32"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "Device name. By default, looks like F-0x00010 for deviceType = 1 and deviceId = 16",
+            "example": ""
+          },
+          "organizationId": {
+            "type": "integer",
+            "description": "Organization id the device belongs to",
+            "format": "int32"
+          },
+          "authCode": {
+            "type": "string",
+            "readOnly": true
+          },
+          "comments": {
+            "type": "string",
+            "description": "User comments for device",
+            "example": ""
+          },
+          "hiveCreationTime": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "hiveFirstheardTime": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "hiveLastheardTime": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "firmwareVersion": {
+            "type": "string",
+            "description": "Device firmware version",
+            "example": ""
+          },
+          "hardwareVersion": {
+            "type": "string",
+            "description": "Device hardware version",
+            "example": ""
+          },
+          "lastTelemetryReportPacketId": {
+            "type": "integer",
+            "description": "Packet id of last telemetry report from device",
+            "format": "int64",
+            "readOnly": true
+          },
+          "lastHeardByDeviceType": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "lastHeardByDeviceId": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "lastHeardTime": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "counter": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "dayofyear": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "lastHeardCounter": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "lastHeardDayofyear": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "lastHeardByGroundstationId": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "uptime": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "status": {
+            "type": "integer",
+            "description": "Status of device",
+            "format": "int32"
+          },
+          "twoWayEnabled": {
+            "type": "boolean",
+            "description": "Whether or not this device can receive return messages from the hive. Only applies to field devices.",
+            "example": false,
+            "default": false
+          },
+          "dataEncryptionEnabled": {
+            "type": "boolean",
+            "description": "Whether messages to/from this device are encrypted.",
+            "example": false,
+            "default": false
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Key/value metadata for this device."
+            },
+            "description": "Key/value metadata for this device."
+          },
+          "userApplicationId": {
+            "type": "integer",
+            "format": "int32",
+            "deprecated": true
+          }
+        }
+      },
+      "OrganizationUpdateJson": {
+        "type": "object",
+        "properties": {
+          "isBilled": { "type": "boolean" },
+          "name": { "type": "string" },
+          "billingEmail": { "type": "string" },
+          "stripeCustomerId": { "type": "string" }
+        }
+      },
+      "Organization": {
+        "required": [ "name", "organizationId" ],
+        "type": "object",
+        "properties": {
+          "isBilled": { "type": "boolean" },
+          "organizationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": { "type": "string" },
+          "billingEmail": { "type": "string" }
+        }
+      },
+      "UserContext": {
+        "required": [ "enabled", "featureFlags", "organizationId", "registered", "role", "userId", "username" ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": { "type": "string" },
+          "organizationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": { "type": "boolean" },
+          "registered": { "type": "boolean" },
+          "email": { "type": "string" },
+          "country": { "type": "string" },
+          "role": {
+            "type": "string",
+            "enum": [ "SUPER_ADMIN", "ADMIN", "USER", "GROUND_STATION", "TOOLS" ]
+          },
+          "featureFlags": {
+            "type": "object",
+            "additionalProperties": { "type": "boolean" }
+          },
+          "userApplicationId": {
+            "type": "integer",
+            "format": "int32",
+            "deprecated": true
+          }
+        }
+      },
+      "RFPacketTelemetryPublic": {
+        "required": [ "deviceId", "deviceType", "packetId", "telemetryAltitude", "telemetryAt", "telemetryBatteryCurrent", "telemetryBatteryVoltage", "telemetryCourse", "telemetryLatitude", "telemetryLongitude", "telemetrySpeed", "telemetryTemperatureK", "telemetryVersion" ],
+        "type": "object",
+        "properties": {
+          "packetId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "telemetryVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "telemetryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "telemetryLatitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "telemetryLongitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "telemetryAltitude": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "telemetryCourse": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "telemetrySpeed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "telemetryBatteryVoltage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "telemetryBatteryCurrent": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "telemetryTemperatureK": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deviceType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ecefVectors": { "type": "string" },
+          "telemetrySatCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UserMessageDetails": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attempts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/UserMessage" }
+          }
+        }
+      },
+      "ApplicationIdMessageCountJson": {
+        "required": [ "applicationId", "messageCount", "messageCountsByDevice" ],
+        "type": "object",
+        "properties": {
+          "messageCount": {
+            "type": "integer",
+            "description": "Total message count",
+            "format": "int32"
+          },
+          "fromDeviceMessageCount": {
+            "type": "integer",
+            "description": "Total messages sent from a device to the hive",
+            "format": "int32"
+          },
+          "toDeviceMessageCount": {
+            "type": "integer",
+            "description": "Total messages sent from the hive to a device",
+            "format": "int32"
+          },
+          "messageCountsByDevice": {
+            "type": "array",
+            "description": "Message count by device id",
+            "items": { "$ref": "#/components/schemas/DeviceMessageCountJson" }
+          },
+          "applicationId": {
+            "type": "integer",
+            "description": "Application id",
+            "format": "int32"
+          }
+        },
+        "description": "Message count by application id"
+      },
+      "DeviceMessageCountJson": {
+        "required": [ "deviceId", "deviceType", "messageCount" ],
+        "type": "object",
+        "properties": {
+          "messageCount": {
+            "type": "integer",
+            "description": "Total message count",
+            "format": "int32"
+          },
+          "fromDeviceMessageCount": {
+            "type": "integer",
+            "description": "Total messages sent from a device to the hive",
+            "format": "int32"
+          },
+          "toDeviceMessageCount": {
+            "type": "integer",
+            "description": "Total messages sent from the hive to a device",
+            "format": "int32"
+          },
+          "deviceType": {
+            "type": "integer",
+            "description": "Device type",
+            "format": "int32"
+          },
+          "deviceId": {
+            "type": "integer",
+            "description": "Device id",
+            "format": "int32"
+          }
+        },
+        "description": "Message count by device id"
+      },
+      "MessageCountByApplicationIdJson": {
+        "required": [ "messageCountsByApplicationId", "totalMessageCount" ],
+        "type": "object",
+        "properties": {
+          "totalMessageCount": {
+            "type": "integer",
+            "description": "Total message count",
+            "format": "int32"
+          },
+          "messageCountsByApplicationId": {
+            "type": "array",
+            "description": "Message count by application id",
+            "items": { "$ref": "#/components/schemas/ApplicationIdMessageCountJson" }
+          }
+        }
+      },
+      "LoginForm": {
+        "required": [ "username", "password" ],
+        "type": "object",
+        "properties": {
+          "username": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "name": "JSESSIONID",
+        "in": "cookie"
+      },
+      "bearerTokenAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
