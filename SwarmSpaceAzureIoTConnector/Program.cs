@@ -17,6 +17,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
@@ -37,6 +38,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 {
                     l.AddConsole();
                     l.AddApplicationInsightsWebJobs(o => o.ConnectionString = (context.Configuration.GetConnectionString("ApplicationInsights")));
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<ISwarmSpaceBumblebeeHive, SwarmSpaceBumblebeeHive>();
                 })
                 .UseConsoleLifetime()
                 .Build();
