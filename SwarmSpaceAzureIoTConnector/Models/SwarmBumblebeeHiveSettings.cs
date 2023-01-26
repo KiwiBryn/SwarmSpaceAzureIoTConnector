@@ -15,7 +15,7 @@
 //---------------------------------------------------------------------------------
 namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 {
-    public class BumblebeeHiveSettings
+    public class SwarmBumblebeeHiveSettings
     {
         public string BaseUrl { get; set; } = string.Empty;
 
