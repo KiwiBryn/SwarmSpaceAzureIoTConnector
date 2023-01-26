@@ -22,13 +22,13 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     using Newtonsoft.Json;
 
-    public class UplinkQueueTriggerProcessor
+    public class UplinkProcessor
     {
         private readonly ILogger _logger;
 
-        public UplinkQueueTriggerProcessor(ILoggerFactory loggerFactory)
+        public UplinkProcessor(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<UplinkQueueTriggerProcessor>();
+            _logger = loggerFactory.CreateLogger<UplinkProcessor>();
         }
 
         [Function("UplinkQueueTrigger")]
