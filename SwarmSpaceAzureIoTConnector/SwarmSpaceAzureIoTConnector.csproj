@@ -1,10 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<AzureFunctionsVersion>v4</AzureFunctionsVersion>		
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<RootNamespace>devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector</RootNamespace>
+		<UserSecretsId>00f193f0-7cd4-43c8-a885-336029a808b9</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="LazyCache" Version="2.4.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+		<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.21.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.7.0" />
+		<PackageReference Include="Microsoft.Azure.WebJobs.Logging.ApplicationInsights" Version="3.0.33" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="host.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="local.settings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>
