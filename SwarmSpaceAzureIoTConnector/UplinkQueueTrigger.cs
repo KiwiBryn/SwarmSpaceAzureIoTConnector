@@ -15,9 +15,12 @@
 //---------------------------------------------------------------------------------
 namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
+
+    using Newtonsoft.Json;
 
     public class UplinkQueueTriggerProcessor
     {
@@ -29,9 +32,11 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         }
 
         [Function("UplinkQueueTrigger")]
-        public async Task Run([QueueTrigger("uplink1", Connection = "AzureFunctionsStorage")] string myQueueItem)
+        public async Task Run([QueueTrigger("uplink1", Connection = "AzureFunctionsStorage")] string payload)
         {
-            _logger.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
+            Models.UplinkPayload uplinkPayload = JsonConvert.DeserializeObject<Models.UplinkPayload>(payload);
+
+            _logger.LogInformation($"C# Queue trigger function processed: {uplinkPayload.PacketId}");
         }
     }
 }
