@@ -14,7 +14,7 @@
     <RepositoryUrl>https://github.com/KiwiBryn/SwarmSpaceAzureIoTConnector</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://blog.devmobile.co.nz/</PackageProjectUrl>
-    <AssemblyVersion>1.0.1.1</AssemblyVersion>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

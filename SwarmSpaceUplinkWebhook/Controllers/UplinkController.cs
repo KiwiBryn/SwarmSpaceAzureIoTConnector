@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 //---------------------------------------------------------------------------------
-namespace devmobile.IoT.SwarmConnector.SwarmSpace.UplinkWebhook.Controllers
+namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Controllers
 {
     using System;
     using System.Threading.Tasks;

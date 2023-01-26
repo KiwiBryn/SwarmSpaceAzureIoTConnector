@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 //---------------------------------------------------------------------------------
-namespace devmobile.IoT.SwarmConnector.SwarmSpace.UplinkWebhook
+namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook
 {
     using Microsoft.AspNetCore.Builder;
     using Microsoft.Extensions.Azure;

@@ -31,7 +31,7 @@
     }
 */
 
-namespace devmobile.IoT.SwarmConnector.SwarmSpace.UplinkWebhook.Models
+namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Models
 {
     using System;
     using System.ComponentModel.DataAnnotations;
