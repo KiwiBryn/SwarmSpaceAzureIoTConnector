@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 //---------------------------------------------------------------------------------
-namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector
+namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
     using System;
     using System.Threading.Tasks;

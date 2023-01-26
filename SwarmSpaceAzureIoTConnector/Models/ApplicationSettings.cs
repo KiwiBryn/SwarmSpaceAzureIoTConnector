@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 //---------------------------------------------------------------------------------
-namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
+namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 {
     public class ApplicationSettings
     {

@@ -31,7 +31,7 @@
     }
 */
 
-namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
+namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 {
     using System;
     using System.ComponentModel.DataAnnotations;

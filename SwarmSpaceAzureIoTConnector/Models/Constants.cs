@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 //---------------------------------------------------------------------------------
-namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
+namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 {
     // TODO: Add status enum ? Message status. Possible values: 0 = incoming message (from a device) 1 = outgoing message (to a device) 2 = incoming message, acknowledged as seen by customer. OR a outgoing message packet is on groundstation 3 = outgoing message, packet is on satellite -1 = error -3 = failed to deliver, retrying -4 = failed to deliver, will not re-attempt
     public static class Constants
