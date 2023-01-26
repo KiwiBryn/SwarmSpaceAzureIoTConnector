@@ -17,5 +17,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 {
     public class ApplicationSettings
     {
+        public int OrganisationId { get; set; }
+
     }
 }
