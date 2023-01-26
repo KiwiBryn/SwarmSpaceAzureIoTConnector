@@ -33,7 +33,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                    c.AddUserSecrets("00f193f0-7cd4-43c8-a885-336029a808b9");
 #endif
                    c.AddEnvironmentVariables();
-               })
+                })
                 .ConfigureLogging((context, l) =>
                 {
                     l.AddConsole();
@@ -41,7 +41,21 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 })
                 .ConfigureServices(services =>
                 {
+                    services.AddHttpClient();
+                    services.AddOptions<Models.SwarmBumblebeeHiveSettings>().Configure<IConfiguration>((settings, configuration) =>
+                    {
+                        configuration.GetSection("SwarmBumblebeeHive").Bind(settings);
+                    });
+                    services.AddOptions<Models.AzureIoTSettings>().Configure<IConfiguration>((settings, configuration) =>
+                    {
+                        configuration.GetSection("AzureIoT").Bind(settings);
+                    });
+                    services.AddOptions<Models.ApplicationSettings>().Configure<IConfiguration>((settings, configuration) =>
+                    {
+                        configuration.GetSection("Application").Bind(settings);
+                    });
                     services.AddSingleton<ISwarmSpaceBumblebeeHive, SwarmSpaceBumblebeeHive>();
+                    services.AddHostedService<StartUpService>();
                 })
                 .UseConsoleLifetime()
                 .Build();

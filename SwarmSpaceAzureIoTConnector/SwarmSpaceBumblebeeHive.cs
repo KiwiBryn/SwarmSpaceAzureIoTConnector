@@ -41,12 +41,12 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     {
         private string _token = string.Empty;
         private readonly ILogger<SwarmSpaceBumblebeeHive> _logger;
-        private readonly Models.BumblebeeHiveSettings _bumblebeeHiveSettings;
+        private readonly Models.SwarmBumblebeeHiveSettings _bumblebeeHiveSettings;
         private readonly IHttpClientFactory _httpClientFactory;
 
         public SwarmSpaceBumblebeeHive(ILogger<SwarmSpaceBumblebeeHive> logger,
                                 IHttpClientFactory httpClientFactory,
-                                IOptions<Models.BumblebeeHiveSettings> bumblebeeHiveSettings) =>
+                                IOptions<Models.SwarmBumblebeeHiveSettings> bumblebeeHiveSettings) =>
                 (_logger, _httpClientFactory, _bumblebeeHiveSettings) =
                 (logger, httpClientFactory, bumblebeeHiveSettings.Value);
 
