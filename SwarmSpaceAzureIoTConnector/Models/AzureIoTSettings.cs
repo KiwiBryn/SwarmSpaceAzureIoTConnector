@@ -52,14 +52,14 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 
         public string ConnectionString { get; set; } = string.Empty;
 
-        public AzureDeviceProvisioningServices DeviceProvisioningServices { get; set; }
+        public AzureDeviceProvisioningService DeviceProvisioningService { get; set; }
 
         public string DtdlModelId { get; set; } = string.Empty;
     }
 
     public class AzureIoTCentralSetting
     {
-        public AzureDeviceProvisioningServices DeviceProvisioningService { get; set; }
+        public AzureDeviceProvisioningService DeviceProvisioningService { get; set; }
 
         public Dictionary<string, AzureIoTCentralMethodSetting> Methods { get; set; }
     }
@@ -71,7 +71,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
         public string Payload { get; set; } = string.Empty;
     }
 
-    public class AzureDeviceProvisioningServices
+    public class AzureDeviceProvisioningService
     {
         public string GlobalDeviceEndpoint { get; set; } = string.Empty;
 
