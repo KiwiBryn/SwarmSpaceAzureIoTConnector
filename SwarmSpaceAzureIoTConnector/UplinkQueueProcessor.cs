@@ -35,16 +35,20 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    using PayloadFormatter; // Short cut namespace for V1 formatters
+
     public class UplinkQueueProcessor
     {
         private readonly ILogger _logger;
         private readonly static IAppCache _deviceClients = new CachingService();
         private readonly Models.AzureIoTSettings _azureIoTSettings;
+        private readonly IPayloadFormatterCache _payloadFormatterCache;
 
-        public UplinkQueueProcessor(ILoggerFactory loggerFactory, IOptions<Models.AzureIoTSettings> azureIoTSettings)
+        public UplinkQueueProcessor(ILoggerFactory loggerFactory, IOptions<Models.AzureIoTSettings> azureIoTSettings, IPayloadFormatterCache payloadFormatterCache)
         {
             _logger = loggerFactory.CreateLogger<UplinkQueueProcessor>();
             _azureIoTSettings = azureIoTSettings.Value;
+            _payloadFormatterCache = payloadFormatterCache;
         }
 
         [Function("UplinkQueueTrigger")]
@@ -90,52 +94,83 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     throw new NotImplementedException("AzureIoT unsupported ApplicationType");
             }
 
-            JObject telemetryEvent = new JObject
+            IFormatterUplink payloadFormatterUplink;
+
+            try
+            {
+                payloadFormatterUplink = await _payloadFormatterCache.UplinkGetAsync(uplinkPayload.UserApplicationId);
+            }
+            catch (CSScriptLib.CompilerException cex)
+            {
+                _logger.LogInformation(cex, "Uplink-DeviceID:{deviceId} UserApplicationId:{UserApplicationId} payload formatter compilation failed", uplinkPayload.DeviceId, uplinkPayload.UserApplicationId);
+
+                throw new InvalidProgramException("Uplink payload formatter invalid or not found");
+            }
+
+            byte[] payloadBytes = null;
+
+            try
+            {
+                payloadBytes = Convert.FromBase64String(uplinkPayload.Data);
+            }
+            catch (FormatException fex)
+            {
+                _logger.LogWarning(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.FromBase64String(payload.Data) failed", uplinkPayload.DeviceId, uplinkPayload.PacketId);
+
+                throw new ArgumentException("Convert.FromBase64String(payload.Data) failed");
+            }
+
+            string payloadText = string.Empty;
+            JObject payloadJson = null;
+
+            if (payloadBytes.Length > 1)
+            {
+                try
                 {
-                    { "packetId", uplinkPayload.PacketId},
-                    { "deviceType" , uplinkPayload.DeviceType},
-                    { "DeviceID", uplinkPayload.DeviceId },
-                    { "OrganizationId", uplinkPayload.OrganizationId },
-                    { "UserApplicationId", uplinkPayload.UserApplicationId },
-                    { "ReceivedAtUtc", uplinkPayload.HiveRxTimeUtc.ToString("s", CultureInfo.InvariantCulture)},
-                    { "DataLength", payload.Length },
-                    { "Data", uplinkPayload.Data },
-                    { "Status", uplinkPayload.Status },
-                };
+                    payloadText = Encoding.UTF8.GetString(payloadBytes);
+
+                    payloadJson = JObject.Parse(payloadText);
+                }
+                catch (FormatException fex)
+                {
+                    _logger.LogWarning(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.ToString(payloadBytes) failed", uplinkPayload.DeviceId, uplinkPayload.PacketId);
+                }
+                catch (JsonReaderException jrex)
+                {
+                    _logger.LogWarning(jrex, "Uplink- DeviceId:{0} PacketId:{1} JObject.Parse(payloadText) failed", uplinkPayload.DeviceId, uplinkPayload.PacketId);
+                }
+            }
+
+            JObject telemetryEvent = new JObject
+            {
+                { "packetId", uplinkPayload.PacketId},
+                { "deviceType" , uplinkPayload.DeviceType},
+                { "DeviceID", uplinkPayload.DeviceId },
+                { "OrganizationId", uplinkPayload.OrganizationId },
+                { "UserApplicationId", uplinkPayload.UserApplicationId },
+                { "ReceivedAtUtc", uplinkPayload.HiveRxTimeUtc.ToString("s", CultureInfo.InvariantCulture)},
+                { "DataLength", payload.Length },
+                { "Data", uplinkPayload.Data },
+                { "Status", uplinkPayload.Status },
+            };
+
+            _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent before:{0}", uplinkPayload.DeviceId, uplinkPayload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
 
             // Send the message to Azure IoT Hub
-            using (Message ioTHubmessage = new Message(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(telemetryEvent))))
+            using (Message ioTHubmessage = payloadFormatterUplink.Evaluate(uplinkPayload.OrganizationId, uplinkPayload.DeviceId, context.DeviceType, uplinkPayload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes))
             {
-                // Ensure the displayed time is the acquired time rather than the uploaded time. 
+                _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent after:{0}", uplinkPayload.DeviceId, uplinkPayload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
+
                 ioTHubmessage.Properties.Add("PacketId", uplinkPayload.PacketId.ToString());
-                ioTHubmessage.Properties.Add("DeviceType", uplinkPayload.DeviceType.ToString());
+                ioTHubmessage.Properties.Add("deviceType", uplinkPayload.DeviceType.ToString());
                 ioTHubmessage.Properties.Add("DeviceId", uplinkPayload.DeviceId.ToString());
-                ioTHubmessage.Properties.Add("OrganizationId", uplinkPayload.OrganizationId.ToString());
                 ioTHubmessage.Properties.Add("UserApplicationId", uplinkPayload.UserApplicationId.ToString());
-                ioTHubmessage.Properties.Add("iothub-creation-time-utc", uplinkPayload.HiveRxTimeUtc.ToString("s", CultureInfo.InvariantCulture));
-                ioTHubmessage.Properties.Add("Status", uplinkPayload.Status.ToString());
+                ioTHubmessage.Properties.Add("OrganizationId", uplinkPayload.OrganizationId.ToString());
 
                 await deviceClient.SendEventAsync(ioTHubmessage);
 
-                _logger.LogInformation("Uplink-PacketID:{0} DeviceID:{1} SendEventAsync success", uplinkPayload.PacketId, uplinkPayload.DeviceId);
+                _logger.LogInformation("Uplink-DeviceID:{deviceId} PacketId:{1} SendEventAsync success", uplinkPayload.DeviceId, uplinkPayload.PacketId);
             }
-
-            /*
-            using (Message ioTHubmessage = swarmSpaceFormatterUplink.Evaluate(payload.OrganizationId, payload.DeviceId, context.DeviceType, payload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes))
-            {
-                _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent after:{0}", payload.DeviceId, payload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
-
-                ioTHubmessage.Properties.Add("PacketId", payload.PacketId.ToString());
-                ioTHubmessage.Properties.Add("OrganizationId", payload.OrganizationId.ToString());
-                ioTHubmessage.Properties.Add("UserApplicationId", payload.UserApplicationId.ToString());
-                ioTHubmessage.Properties.Add("DeviceId", payload.DeviceId.ToString());
-                ioTHubmessage.Properties.Add("deviceType", payload.DeviceType.ToString());
-
-                await deviceClient.SendEventAsync(ioTHubmessage);
-
-                _logger.LogInformation("Uplink-DeviceID:{deviceId} PacketId:{1} SendEventAsync success", payload.DeviceId, payload.PacketId);
-            }
-            */
         }
 
         private async Task<DeviceClient> AzureIoTHubDeviceConnectionStringConnectAsync(string deviceId, object context)
@@ -189,7 +224,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                         securityProvider,
                         transport);
 
-                    // If TTI application does have a DTDLV2 ID 
                     if (!string.IsNullOrEmpty(deviceProvisioningService.DtdlModelId))
                     {
                         ProvisioningRegistrationAdditionalData provisioningRegistrationAdditionalData = new ProvisioningRegistrationAdditionalData()
