@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 public class FormatterUplink : PayloadFormatter.IFormatterUplink
 {
-    public Message Evaluate(int organisationId, int deviceId, int deviceType, int userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes)
+    public Message Evaluate(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes)
     {
         if ((payloadText != "") && (payloadJson != null))
         {
