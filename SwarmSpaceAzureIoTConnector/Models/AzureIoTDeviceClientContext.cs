@@ -24,6 +24,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 
         public uint DeviceId { get; set; } //public uint DeviceId { get; set; }
 
-        public int DeviceType { get; set; }
+        public byte DeviceType { get; set; }
     }
 }
