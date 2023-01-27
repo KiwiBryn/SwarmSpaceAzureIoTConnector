@@ -261,7 +261,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                             throw new NotImplementedException("AzureIoT Hub unsupported ConnectionType");
                     }
 
-                    /*
                     if (!message.Properties.TryGetValue("UserApplicationId", out string value) || !int.TryParse(message.Properties["UserApplicationId"], out int userApplicationId))
                     {
                         _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} MessageID:{MessageId} DeviceType:{context.DeviceType} OrganisationId:{OrganisationId} - UserApplicationId property missing or invalid", context.DeviceId, message.MessageId, context.DeviceType, context.OrganisationId);
@@ -279,10 +278,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                         return;
                     }
-                    _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} MessageID:{MessageId} UserApplicationId:{userApplicationId}", context.DeviceId, message.MessageId, userApplicationId);
 
-                    await _bumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, message.GetBytes());
-                    */
+                    //await _bumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, message.GetBytes());
+
+                    _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} MessageID:{MessageId} UserApplicationId:{userApplicationId}", context.DeviceId, message.MessageId, userApplicationId);
 
                     await deviceClient.CompleteAsync(message);
                 }
