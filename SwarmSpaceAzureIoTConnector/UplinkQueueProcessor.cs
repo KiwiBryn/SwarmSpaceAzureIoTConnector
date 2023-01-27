@@ -152,6 +152,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 { "DataLength", payload.Length },
                 { "Data", uplinkPayload.Data },
                 { "Status", uplinkPayload.Status },
+                { "Client", uplinkPayload.Client },
             };
 
             _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent before:{0}", uplinkPayload.DeviceId, uplinkPayload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
@@ -166,6 +167,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 ioTHubmessage.Properties.Add("DeviceId", uplinkPayload.DeviceId.ToString());
                 ioTHubmessage.Properties.Add("UserApplicationId", uplinkPayload.UserApplicationId.ToString());
                 ioTHubmessage.Properties.Add("OrganizationId", uplinkPayload.OrganizationId.ToString());
+                ioTHubmessage.Properties.Add("Client", uplinkPayload.Client);
 
                 await deviceClient.SendEventAsync(ioTHubmessage);
 
