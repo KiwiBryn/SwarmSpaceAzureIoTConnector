@@ -21,12 +21,12 @@ namespace PayloadFormatter // Additional namespace for shortening interface when
 
     public interface IFormatterUplink
     {
-        public Message Evaluate(int organisationId, int deviceId, int deviceType, int userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes);
+        public Message Evaluate(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes);
     }
 
     public interface IFormatterDownlink
     {
-        public byte[] Evaluate(int organisationId, int deviceId, int deviceType, int userApplicationId, JObject payloadJson);
+        public byte[] Evaluate(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson);
     }
 }
 
