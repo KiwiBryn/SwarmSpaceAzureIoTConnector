@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 public class FormatterDownlink : PayloadFormatter.IFormatterDownlink
 {
-    public byte[] Evaluate(int organisationId, int deviceId, int deviceType, int userApplicationId, JObject payloadJson)
+    public byte[] Evaluate(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson)
     {
         byte? status = payloadJson.Value<byte?>("FanStatus");
 
