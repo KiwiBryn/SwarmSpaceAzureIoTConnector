@@ -63,12 +63,14 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Con
                 Status = payloadWeb.Status,
                 SwarmHiveReceivedAtUtc = payloadWeb.HiveRxTime,
                 UplinkWebHookReceivedAtUtc = DateTime.UtcNow,
-                Client = apiKeyName,                 
+                Client = apiKeyName,
             };
 
             _logger.LogInformation("SendAsync queue name:{QueueName}", _applicationSettings.QueueName);
 
-            await _queueServiceClient.GetQueueClient(_applicationSettings.QueueName).SendMessageAsync(JsonSerializer.Serialize(payloadQueue));
+            QueueClient queueClient = _queueServiceClient.GetQueueClient(_applicationSettings.QueueName);
+
+            await queueClient.SendMessageAsync(Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(payloadQueue)));
 
             return this.Ok();
         }
