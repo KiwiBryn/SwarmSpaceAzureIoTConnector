@@ -56,7 +56,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         {
             DeviceClient deviceClient = null;
 
-            Models.UplinkPayload uplinkPayload = JsonConvert.DeserializeObject<Models.UplinkPayload>(payload);
+            Models.UplinkPayloadQueueDto uplinkPayload = JsonConvert.DeserializeObject<Models.UplinkPayloadQueueDto>(payload);
 
             Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
             {
@@ -148,14 +148,13 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 { "DeviceID", uplinkPayload.DeviceId },
                 { "OrganizationId", uplinkPayload.OrganizationId },
                 { "UserApplicationId", uplinkPayload.UserApplicationId },
-                { "ReceivedAtUtc", uplinkPayload.HiveRxTimeUtc.ToString("s", CultureInfo.InvariantCulture)},
+                { "SwarmHiveReceivedAtUtc", uplinkPayload.SwarmHiveReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
+                { "UplinkWebHookReceivedAtUtc", uplinkPayload.UplinkWebHookReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
                 { "DataLength", payload.Length },
                 { "Data", uplinkPayload.Data },
                 { "Status", uplinkPayload.Status },
                 { "Client", uplinkPayload.Client },
             };
-
-            _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent before:{0}", uplinkPayload.DeviceId, uplinkPayload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
 
             // Send the message to Azure IoT Hub
             using (Message ioTHubmessage = payloadFormatterUplink.Evaluate(uplinkPayload.OrganizationId, uplinkPayload.DeviceId, context.DeviceType, uplinkPayload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes))
