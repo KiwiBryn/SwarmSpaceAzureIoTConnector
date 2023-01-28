@@ -52,18 +52,16 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         }
 
         [Function("UplinkQueueTrigger")]
-        public async Task Run([QueueTrigger("uplink1", Connection = "AzureFunctionsStorage")] string payload)
+        public async Task Run([QueueTrigger("uplink1", Connection = "AzureFunctionsStorage")] Models.UplinkPayloadQueueDto payload)
         {
             DeviceClient deviceClient = null;
 
-            Models.UplinkPayloadQueueDto uplinkPayload = JsonConvert.DeserializeObject<Models.UplinkPayloadQueueDto>(payload);
-
             Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
             {
-                OrganisationId = uplinkPayload.OrganizationId,
-                //UserApplicationId = uplinkPayload.UserApplicationId, deprecated
-                DeviceType = uplinkPayload.DeviceType,
-                DeviceId = uplinkPayload.DeviceId,
+                OrganisationId = payload.OrganizationId,
+                //UserApplicationId = payload.UserApplicationId, deprecated
+                DeviceType =payload.DeviceType,
+                DeviceId = payload.DeviceId,
             };
 
             switch (_azureIoTSettings.ApplicationType)
@@ -72,10 +70,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     switch (_azureIoTSettings.AzureIotHub.ConnectionType)
                     {
                         case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                            deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(uplinkPayload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(uplinkPayload.DeviceId.ToString(), context), memoryCacheEntryOptions);
+                            deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(payload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(payload.DeviceId.ToString(), context), memoryCacheEntryOptions);
                             break;
                         case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                            deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(uplinkPayload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(uplinkPayload.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
+                            deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(payload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(payload.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
                             break;
                         default:
                             _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
@@ -85,7 +83,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     break;
 
                 case Models.ApplicationType.AzureIoTCentral:
-                    deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(uplinkPayload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(uplinkPayload.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
+                    deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(payload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(payload.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
                     break;
 
                 default:
@@ -98,11 +96,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             try
             {
-                payloadFormatterUplink = await _payloadFormatterCache.UplinkGetAsync(uplinkPayload.UserApplicationId);
+                payloadFormatterUplink = await _payloadFormatterCache.UplinkGetAsync(payload.UserApplicationId);
             }
             catch (CSScriptLib.CompilerException cex)
             {
-                _logger.LogInformation(cex, "Uplink-DeviceID:{deviceId} UserApplicationId:{UserApplicationId} payload formatter compilation failed", uplinkPayload.DeviceId, uplinkPayload.UserApplicationId);
+                _logger.LogInformation(cex, "Uplink-DeviceID:{deviceId} UserApplicationId:{UserApplicationId} payload formatter compilation failed", payload.DeviceId, payload.UserApplicationId);
 
                 throw new InvalidProgramException("Uplink payload formatter invalid or not found");
             }
@@ -111,11 +109,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             try
             {
-                payloadBytes = Convert.FromBase64String(uplinkPayload.Data);
+                payloadBytes = Convert.FromBase64String(payload.Data);
             }
             catch (FormatException fex)
             {
-                _logger.LogWarning(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.FromBase64String(payload.Data) failed", uplinkPayload.DeviceId, uplinkPayload.PacketId);
+                _logger.LogWarning(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.FromBase64String(payload.Data) failed", payload.DeviceId, payload.PacketId);
 
                 throw new ArgumentException("Convert.FromBase64String(payload.Data) failed");
             }
@@ -133,44 +131,44 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 }
                 catch (FormatException fex)
                 {
-                    _logger.LogWarning(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.ToString(payloadBytes) failed", uplinkPayload.DeviceId, uplinkPayload.PacketId);
+                    _logger.LogWarning(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.ToString(payloadBytes) failed", payload.DeviceId, payload.PacketId);
                 }
                 catch (JsonReaderException jrex)
                 {
-                    _logger.LogWarning(jrex, "Uplink- DeviceId:{0} PacketId:{1} JObject.Parse(payloadText) failed", uplinkPayload.DeviceId, uplinkPayload.PacketId);
+                    _logger.LogWarning(jrex, "Uplink- DeviceId:{0} PacketId:{1} JObject.Parse(payloadText) failed", payload.DeviceId, payload.PacketId);
                 }
             }
 
             JObject telemetryEvent = new JObject
             {
-                { "packetId", uplinkPayload.PacketId},
-                { "deviceType" , uplinkPayload.DeviceType},
-                { "DeviceID", uplinkPayload.DeviceId },
-                { "OrganizationId", uplinkPayload.OrganizationId },
-                { "UserApplicationId", uplinkPayload.UserApplicationId },
-                { "SwarmHiveReceivedAtUtc", uplinkPayload.SwarmHiveReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
-                { "UplinkWebHookReceivedAtUtc", uplinkPayload.UplinkWebHookReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
+                { "packetId", payload.PacketId},
+                { "deviceType" , payload.DeviceType},
+                { "DeviceID", payload.DeviceId },
+                { "OrganizationId", payload.OrganizationId },
+                { "UserApplicationId", payload.UserApplicationId },
+                { "SwarmHiveReceivedAtUtc", payload.SwarmHiveReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
+                { "UplinkWebHookReceivedAtUtc", payload.UplinkWebHookReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
                 { "DataLength", payload.Length },
-                { "Data", uplinkPayload.Data },
-                { "Status", uplinkPayload.Status },
-                { "Client", uplinkPayload.Client },
+                { "Data", payload.Data },
+                { "Status", payload.Status },
+                { "Client", payload.Client },
             };
 
             // Send the message to Azure IoT Hub
-            using (Message ioTHubmessage = payloadFormatterUplink.Evaluate(uplinkPayload.OrganizationId, uplinkPayload.DeviceId, context.DeviceType, uplinkPayload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes))
+            using (Message ioTHubmessage = payloadFormatterUplink.Evaluate(payload.OrganizationId, payload.DeviceId, context.DeviceType, payload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes))
             {
-                _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent after:{0}", uplinkPayload.DeviceId, uplinkPayload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
+                _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent after:{0}", payload.DeviceId, payload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
 
-                ioTHubmessage.Properties.Add("PacketId", uplinkPayload.PacketId.ToString());
-                ioTHubmessage.Properties.Add("deviceType", uplinkPayload.DeviceType.ToString());
-                ioTHubmessage.Properties.Add("DeviceId", uplinkPayload.DeviceId.ToString());
-                ioTHubmessage.Properties.Add("UserApplicationId", uplinkPayload.UserApplicationId.ToString());
-                ioTHubmessage.Properties.Add("OrganizationId", uplinkPayload.OrganizationId.ToString());
-                ioTHubmessage.Properties.Add("Client", uplinkPayload.Client);
+                ioTHubmessage.Properties.Add("PacketId", payload.PacketId.ToString());
+                ioTHubmessage.Properties.Add("deviceType", payload.DeviceType.ToString());
+                ioTHubmessage.Properties.Add("DeviceId", payload.DeviceId.ToString());
+                ioTHubmessage.Properties.Add("UserApplicationId", payload.UserApplicationId.ToString());
+                ioTHubmessage.Properties.Add("OrganizationId", payload.OrganizationId.ToString());
+                ioTHubmessage.Properties.Add("Client", payload.Client);
 
                 await deviceClient.SendEventAsync(ioTHubmessage);
 
-                _logger.LogInformation("Uplink-DeviceID:{deviceId} PacketId:{1} SendEventAsync success", uplinkPayload.DeviceId, uplinkPayload.PacketId);
+                _logger.LogInformation("Uplink-DeviceID:{deviceId} PacketId:{1} SendEventAsync success", payload.DeviceId, payload.PacketId);
             }
         }
 

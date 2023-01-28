@@ -27,7 +27,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
         public ushort UserApplicationId { get; set; }
         public uint OrganizationId { get; set; }
         public string Data { get; set; } = string.Empty;
-        public int Length { get; set; }
+        public byte Length { get; set; }
         public int Status { get; set; }
         public DateTime SwarmHiveReceivedAtUtc { get; set; }
         public DateTime UplinkWebHookReceivedAtUtc { get; set; }

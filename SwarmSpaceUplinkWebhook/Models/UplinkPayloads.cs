@@ -28,7 +28,7 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Mod
         public ushort UserApplicationId { get; set; }
         public uint OrganizationId { get; set; }
         public string Data { get; set; } = string.Empty;
-        public int Length { get; set; }
+        public byte Length { get; set; }
         public int Status { get; set; }
         public DateTime SwarmHiveReceivedAtUtc { get; set; }
         public DateTime UplinkWebHookReceivedAtUtc { get; set; }
@@ -45,7 +45,7 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Mod
         public string Data { get; set; } = string.Empty;
 
         [Range(Constants.PayloadLengthMinimum, Constants.PayloadLengthMaximum)]
-        public int Len { get; set; }
+        public byte Len { get; set; }
         public int Status { get; set; }
 
         public DateTime HiveRxTime { get; set; }
