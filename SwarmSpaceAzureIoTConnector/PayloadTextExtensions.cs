@@ -14,21 +14,20 @@
 // limitations under the License.
 //
 //---------------------------------------------------------------------------------
-using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-
 namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
-	public static class PayloadStringExtensions
+    using System;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+
+    public static class PayloadStringExtensions
 	{
-		public static bool IsPayloadEmpty(this String payloadText)
+		public static bool IsPayloadEmpty(this string payloadText)
 		{
 			return payloadText == "@";
 		}
 
-		public static bool IsPayloadValidJson(this String payloadText)
+		public static bool IsPayloadValidJson(this string payloadText)
 		{
 			// In this scenario a valid JSON string should start/end with {/} for an object or [/] for an array
 			if ((payloadText.StartsWith("{") && payloadText.EndsWith("}")) || ((payloadText.StartsWith("[") && payloadText.EndsWith("]"))))
