@@ -30,7 +30,7 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Mod
         public string Data { get; set; } = string.Empty;
         public int Length { get; set; }
         public int Status { get; set; }
-        public DateTime HiveRxTimeUtc { get; set; }
+        public DateTime SwarmHiveReceivedAtUtc { get; set; }
         public DateTime UplinkWebHookReceivedAtUtc { get; set; }
         public string Client { get; set; } = string.Empty;
     }

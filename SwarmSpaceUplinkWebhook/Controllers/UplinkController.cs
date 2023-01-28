@@ -44,11 +44,11 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Con
         {
             if (!_applicationSettings.XApiKeys.TryGetValue(xApiKeyValue, out string apiKeyName))
             {
-                _logger.LogWarning("Authentication unsuccessful X-API-KEY name:{apiKeyName}", apiKeyName);
+                _logger.LogWarning("Authentication unsuccessful X-API-KEY value:{xApiKeyValue}", xApiKeyValue);
 
                 return this.Unauthorized("Unauthorized client");
             }
-            _logger.LogInformation("Authentication successful X-API-KEY name:{apiKeyName}", apiKeyName);
+            _logger.LogInformation("Authentication successful X-API-KEY value:{xApiKeyValue}", xApiKeyValue);
 
             // Could of used AutoMapper but didn't seem worth it for one place
             Models.UplinkPayloadQueueDto payloadQueue = new()
@@ -61,10 +61,12 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Con
                 Data = payloadWeb.Data,
                 Length = payloadWeb.Len,
                 Status = payloadWeb.Status,
-                HiveRxTimeUtc = payloadWeb.HiveRxTime,
+                SwarmHiveReceivedAtUtc = payloadWeb.HiveRxTime,
                 UplinkWebHookReceivedAtUtc = DateTime.UtcNow,
-                Client = apiKeyName,
+                Client = apiKeyName,                 
             };
+
+            _logger.LogInformation("SendAsync queue name:{QueueName}", _applicationSettings.QueueName);
 
             await _queueServiceClient.GetQueueClient(_applicationSettings.QueueName).SendMessageAsync(JsonSerializer.Serialize(payloadQueue));
 
