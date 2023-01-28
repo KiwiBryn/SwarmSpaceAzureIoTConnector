@@ -16,14 +16,13 @@
 namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Controllers
 {
     using System;
+    using System.Text.Json;
     using System.Threading.Tasks;
+
+    using Azure.Storage.Queues;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-
-    using Azure.Storage.Queues;
-
-    using Newtonsoft.Json;
 
     [Route("[controller]")]
     [ApiController]
@@ -41,27 +40,33 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Con
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromHeader(Name = "x-api-key")] string xApiKeyValue, [FromBody] Models.UplinkPayload payload)
+        public async Task<IActionResult> Post([FromHeader(Name = "x-api-key")] string xApiKeyValue, [FromBody] Models.UplinkPayloadWebDto payloadWeb)
         {
             if (!_applicationSettings.XApiKeys.TryGetValue(xApiKeyValue, out string apiKeyName))
             {
+                _logger.LogWarning("Authentication unsuccessful X-API-KEY name:{apiKeyName}", apiKeyName);
+
                 return this.Unauthorized("Unauthorized client");
             }
+            _logger.LogInformation("Authentication successful X-API-KEY name:{apiKeyName}", apiKeyName);
 
-            _logger.LogWarning("Authentication successful X-API-KEY name:{0}", apiKeyName);
-
-            payload.Client = apiKeyName;
-
-            if (payload.HiveRxTimeUtc == DateTime.MinValue)
+            // Could of used AutoMapper but didn't seem worth it for one place
+            Models.UplinkPayloadQueueDto payloadQueue = new()
             {
-                _logger.LogWarning("Receive time validation failed");
+                PacketId = payloadWeb.PacketId,
+                DeviceType = payloadWeb.DeviceType,
+                DeviceId = payloadWeb.DeviceId,
+                UserApplicationId = payloadWeb.UserApplicationId,
+                OrganizationId = payloadWeb.OrganizationId,
+                Data = payloadWeb.Data,
+                Length = payloadWeb.Len,
+                Status = payloadWeb.Status,
+                HiveRxTimeUtc = payloadWeb.HiveRxTime,
+                UplinkWebHookReceivedAtUtc = DateTime.UtcNow,
+                Client = apiKeyName,
+            };
 
-                return this.BadRequest("Receive time validation failed");
-            }
-
-            QueueClient queueClient = _queueServiceClient.GetQueueClient("uplink");
-
-            await queueClient.SendMessageAsync(JsonConvert.SerializeObject(payload));
+            await _queueServiceClient.GetQueueClient(_applicationSettings.QueueName).SendMessageAsync(JsonSerializer.Serialize(payloadQueue));
 
             return this.Ok();
         }

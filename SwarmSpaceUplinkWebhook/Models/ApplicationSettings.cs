@@ -19,6 +19,8 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Mod
 
     public class ApplicationSettings
     {
+        public string QueueName { get; set; } = string.Empty;
+
         public Dictionary<string, string> XApiKeys { get; set; }
     }
 }
