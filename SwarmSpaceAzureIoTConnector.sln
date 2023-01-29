@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwarmSpaceUplinkWebhook", "SwarmSpaceUplinkWebhook\SwarmSpaceUplinkWebhook.csproj", "{BA04BA99-6814-411F-8C37-5FFD9C5652A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwarmSpaceAzureIoTConnector", "SwarmSpaceAzureIoTConnector\SwarmSpaceAzureIoTConnector.csproj", "{C3DCFFE8-5EC9-411E-B1F2-1829B675B5C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwarmSpaceAzureIoTConnector", "SwarmSpaceAzureIoTConnector\SwarmSpaceAzureIoTConnector.csproj", "{C3DCFFE8-5EC9-411E-B1F2-1829B675B5C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BumblebeeClient", "BumblebeeClient\BumblebeeClient.csproj", "{DCAED2A8-454E-4668-8A57-6E6F2B905CB4}"
 EndProject
