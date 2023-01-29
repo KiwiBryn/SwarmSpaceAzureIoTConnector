@@ -56,7 +56,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     });
                     services.AddSingleton<ISwarmSpaceBumblebeeHive, SwarmSpaceBumblebeeHive>();
                     services.AddSingleton<IPayloadFormatterCache, PayloadFormatterCache>();
-                    services.AddHostedService<StartUpService>();
                 })
                 .UseConsoleLifetime()
                 .Build();
