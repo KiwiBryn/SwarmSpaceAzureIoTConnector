@@ -27,11 +27,13 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         private readonly ILogger _logger;
         private readonly Models.AzureIoTSettings _azureIoTSettings;
         private readonly IPayloadFormatterCache _payloadFormatterCache;
+        private readonly ISwarmSpaceBumblebeeHive _swarmSpaceBumblebeeHive;
 
-        public Connector(ILoggerFactory loggerFactory, IOptions<Models.AzureIoTSettings> azureIoTSettings, IPayloadFormatterCache payloadFormatterCache)
+        public Connector(ILoggerFactory loggerFactory, IOptions<Models.AzureIoTSettings> azureIoTSettings, ISwarmSpaceBumblebeeHive swarmSpaceBumblebeeHive, IPayloadFormatterCache payloadFormatterCache)
         {
             _logger = loggerFactory.CreateLogger<Connector>();
             _azureIoTSettings = azureIoTSettings.Value;
+            _swarmSpaceBumblebeeHive = swarmSpaceBumblebeeHive;
             _payloadFormatterCache = payloadFormatterCache;
         }
     }
