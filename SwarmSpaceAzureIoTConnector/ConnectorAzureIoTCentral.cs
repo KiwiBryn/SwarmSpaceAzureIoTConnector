@@ -131,7 +131,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                             byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadJson);
 
-                            //await _bumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadData);
+                            await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadData);
 
                             await deviceClient.CompleteAsync(message);
                         }

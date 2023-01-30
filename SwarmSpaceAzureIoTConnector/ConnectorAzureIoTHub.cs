@@ -72,7 +72,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                         return;
                     }
 
-                    //await _bumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, message.GetBytes());
+                    await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, message.GetBytes());
 
                     _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} MessageID:{MessageId} UserApplicationId:{userApplicationId}", context.DeviceId, message.MessageId, userApplicationId);
 
