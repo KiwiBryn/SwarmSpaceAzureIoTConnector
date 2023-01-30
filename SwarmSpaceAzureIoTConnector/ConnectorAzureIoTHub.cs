@@ -54,7 +54,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                             throw new NotImplementedException("AzureIoT Hub unsupported ConnectionType");
                     }
 
-                    if (!message.Properties.TryGetValue("UserApplicationId", out string value) || !int.TryParse(message.Properties["UserApplicationId"], out int userApplicationId))
+                    if (!message.Properties.TryGetValue("UserApplicationId", out string value) || !ushort.TryParse(message.Properties["UserApplicationId"], out ushort userApplicationId))
                     {
                         _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} MessageID:{MessageId} DeviceType:{context.DeviceType} OrganisationId:{OrganisationId} - UserApplicationId property missing or invalid", context.DeviceId, message.MessageId, context.DeviceType, context.OrganisationId);
 

@@ -34,7 +34,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
         public Task<ICollection<Device>> DeviceListAsync(CancellationToken cancellationToken);
 
-        public Task SendAsync(int organisationId, int deviceId, int deviceType, int userApplicationId, byte[] payload);
+        public Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] payload);
     }
 
     public class SwarmSpaceBumblebeeHive : ISwarmSpaceBumblebeeHive
@@ -102,7 +102,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             }
         }
 
-        public async Task SendAsync(int organisationId, int deviceId, int deviceType, int userApplicationId, byte[] data)
+        public async Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] data)
         {
             using (HttpClient httpClient = _httpClientFactory.CreateClient())
             {
@@ -114,9 +114,9 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                 UserMessage userMessage = new UserMessage()
                 {
-                    OrganizationId = organisationId,
+                    OrganizationId = (int)organisationId,
                     DeviceType = deviceType,
-                    DeviceId = deviceId,
+                    DeviceId = (int)deviceId,
                     UserApplicationId = userApplicationId,
                     Data = data,
                 };
