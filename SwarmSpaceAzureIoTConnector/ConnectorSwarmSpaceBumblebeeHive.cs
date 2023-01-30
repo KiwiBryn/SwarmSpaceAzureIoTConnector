@@ -28,7 +28,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     public partial class Connector
     {
         [Function("Function")]
-        public async Task TimerRun([TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo myTimer, CancellationToken cancellationToken)
+        public async Task TimerRun([TimerTrigger("0 */15 * * * *", RunOnStartup = true)] TimerInfo myTimer, CancellationToken cancellationToken)
         {
             _logger.LogInformation("StartUpService.ExecuteAsync start");
 
