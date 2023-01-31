@@ -19,18 +19,18 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     using System.Threading;
     using System.Threading.Tasks;
 
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Logging;
 
-
     public partial class Connector
     {
-        [Function("Function")]
-        public async Task TimerRun([TimerTrigger("0 */15 * * * *", RunOnStartup = true)] TimerInfo myTimer, CancellationToken cancellationToken)
+        [Function("BumblebeeHiveCacheRefresh")]
+        public async Task<IActionResult> BumblebeeHiveCacheRefreshRun([HttpTrigger(AuthorizationLevel.Anonymous, "get")] CancellationToken cancellationToken)
         {
-            _logger.LogInformation("StartUpService.ExecuteAsync start");
+            _logger.LogInformation("BumblebeeHiveCacheRefresh start");
 
             await _swarmSpaceBumblebeeHive.Login(cancellationToken);
 
@@ -73,7 +73,9 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 }
             }
 
-            _logger.LogInformation("StartUpService.ExecuteAsync finish");
+            _logger.LogInformation("BumblebeeHiveCacheRefresh finish");
+
+            return new OkResult();
         }
     }
 }
