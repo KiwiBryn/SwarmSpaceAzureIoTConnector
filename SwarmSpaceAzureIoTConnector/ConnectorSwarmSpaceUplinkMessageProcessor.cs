@@ -32,8 +32,8 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     public partial class Connector
     {
-        [Function("UplinkQueueTrigger")]
-        public async Task Run([QueueTrigger("uplink", Connection = "AzureFunctionsStorage")] Models.UplinkPayloadQueueDto payload)
+        [Function("UplinkMessageQueueProcessor")]
+        public async Task UplinkMessageQueueProcessor([QueueTrigger("uplink", Connection = "AzureFunctionsStorage")] Models.UplinkPayloadQueueDto payload)
         {
             DeviceClient deviceClient = null;
 
