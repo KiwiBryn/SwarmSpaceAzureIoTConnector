@@ -48,7 +48,7 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Con
 
                 return this.Unauthorized("Unauthorized client");
             }
-            _logger.LogInformation("Authentication successful X-API-KEY value:{xApiKeyValue}", xApiKeyValue);
+            _logger.LogInformation("Authentication successful X-API-KEY value:{apiKeyName}", apiKeyName);
 
             // Could of used AutoMapper but didn't seem worth it for one place
             Models.UplinkPayloadQueueDto payloadQueue = new()
