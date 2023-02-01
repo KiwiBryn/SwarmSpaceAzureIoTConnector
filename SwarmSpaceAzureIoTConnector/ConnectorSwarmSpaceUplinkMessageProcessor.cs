@@ -16,6 +16,7 @@
 namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Text;
     using System.Threading.Tasks;
@@ -120,37 +121,45 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 }
             }
 
-            JObject telemetryEvent = new JObject
-            {
-                { "packetId", payload.PacketId},
-                { "deviceType" , payload.DeviceType},
-                { "DeviceID", payload.DeviceId },
-                { "OrganizationId", payload.OrganizationId },
-                { "UserApplicationId", payload.UserApplicationId },
-                { "SwarmHiveReceivedAtUtc", payload.SwarmHiveReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
-                { "UplinkWebHookReceivedAtUtc", payload.UplinkWebHookReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture)},
-                { "DataLength", payload.Length },
-                { "Data", payload.Data },
-                { "Status", payload.Status },
-                { "Client", payload.Client },
-            };
+            JObject telemetryEvent = new JObject();
 
-            // Send the message to Azure IoT Hub
-            using (Message ioTHubmessage = payloadFormatterUplink.Evaluate(payload.OrganizationId, payload.DeviceId, context.DeviceType, payload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes))
-            {
-                _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent after:{0}", payload.DeviceId, payload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
+            Dictionary<string, string> properties = new Dictionary<string, string>();
 
-                ioTHubmessage.Properties.Add("PacketId", payload.PacketId.ToString());
-                ioTHubmessage.Properties.Add("deviceType", payload.DeviceType.ToString());
-                ioTHubmessage.Properties.Add("DeviceId", payload.DeviceId.ToString());
-                ioTHubmessage.Properties.Add("UserApplicationId", payload.UserApplicationId.ToString());
-                ioTHubmessage.Properties.Add("OrganizationId", payload.OrganizationId.ToString());
-                ioTHubmessage.Properties.Add("Client", payload.Client);
+            payloadFormatterUplink.Evaluate(properties, payload.OrganizationId, payload.DeviceId, context.DeviceType, payload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes);
+
+            telemetryEvent.TryAdd("packetId", payload.PacketId);
+            telemetryEvent.TryAdd("deviceType", payload.DeviceType);
+            telemetryEvent.TryAdd("DeviceID", payload.DeviceId);
+            telemetryEvent.TryAdd("OrganizationId", payload.OrganizationId);
+            telemetryEvent.TryAdd("UserApplicationId", payload.UserApplicationId);
+            telemetryEvent.TryAdd("SwarmHiveReceivedAtUtc", payload.SwarmHiveReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture));
+            telemetryEvent.TryAdd("UplinkWebHookReceivedAtUtc", payload.UplinkWebHookReceivedAtUtc.ToString("s", CultureInfo.InvariantCulture));
+            telemetryEvent.TryAdd("DataLength", payload.Length);
+            telemetryEvent.TryAdd("Data", payload.Data);
+            telemetryEvent.TryAdd("Status", payload.Status);
+            telemetryEvent.TryAdd("Client", payload.Client);
+
+            _logger.LogDebug("Uplink-DeviceId:{0} PacketId:{1} TelemetryEvent:{0}", payload.DeviceId, payload.PacketId, JsonConvert.SerializeObject(telemetryEvent, Formatting.Indented));
+
+            using (Message ioTHubmessage = new Message(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(telemetryEvent))))
+            {
+                // This is so nasty but can't find a better way
+                foreach( var property in properties ) 
+                {
+                    ioTHubmessage.Properties.TryAdd( property.Key, property.Value);
+                }
+
+                ioTHubmessage.Properties.TryAdd("PacketId", payload.PacketId.ToString());
+                ioTHubmessage.Properties.TryAdd("DeviceType", payload.DeviceType.ToString());
+                ioTHubmessage.Properties.TryAdd("DeviceId", payload.DeviceId.ToString());
+                ioTHubmessage.Properties.TryAdd("UserApplicationId", payload.UserApplicationId.ToString());
+                ioTHubmessage.Properties.TryAdd("OrganizationId", payload.OrganizationId.ToString());
+                ioTHubmessage.Properties.TryAdd("Client", payload.Client);
 
                 await deviceClient.SendEventAsync(ioTHubmessage);
+            };
 
-                _logger.LogInformation("Uplink-DeviceID:{deviceId} PacketId:{1} SendEventAsync success", payload.DeviceId, payload.PacketId);
-            }
+            _logger.LogInformation("Uplink-DeviceID:{deviceId} PacketId:{1} SendEventAsync success", payload.DeviceId, payload.PacketId);
         }
     }
 }

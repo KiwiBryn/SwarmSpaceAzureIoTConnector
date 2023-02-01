@@ -18,10 +18,11 @@ namespace PayloadFormatter // Additional namespace for shortening interface when
     using Microsoft.Azure.Devices.Client;
 
     using Newtonsoft.Json.Linq;
+    using System.Collections.Generic;
 
     public interface IFormatterUplink
     {
-        public Message Evaluate(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes);
+        public void Evaluate(Dictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes);
     }
 
     public interface IFormatterDownlink
