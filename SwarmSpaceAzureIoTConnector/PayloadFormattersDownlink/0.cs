@@ -6,8 +6,8 @@ using Newtonsoft.Json.Linq;
 
 public class FormatterDownlink : PayloadFormatter.IFormatterDownlink
 {
-    public byte[] Evaluate(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson)
+    public byte[] Evaluate(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes)
     {
-        return Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(payloadJson));
+        return payloadBytes;
     }
 }
