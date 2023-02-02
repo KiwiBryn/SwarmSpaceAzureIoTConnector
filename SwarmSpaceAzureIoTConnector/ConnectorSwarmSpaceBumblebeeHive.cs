@@ -38,7 +38,8 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             {
                 Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
                 {
-                    OrganisationId = (uint)device.OrganizationId,
+                    // TODO seems a bit odd getting this from application settings
+                    OrganisationId = _applicationSettings.OrganisationId, 
                     //UserApplicationId = device.UserApplicationId, deprecated
                     DeviceType = (byte)device.DeviceType,
                     DeviceId = (uint)device.DeviceId,
