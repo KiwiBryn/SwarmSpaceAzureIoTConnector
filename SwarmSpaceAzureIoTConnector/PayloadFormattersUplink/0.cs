@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-
-using Microsoft.Azure.Devices.Client;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
