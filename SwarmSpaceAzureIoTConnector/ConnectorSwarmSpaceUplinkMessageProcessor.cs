@@ -113,11 +113,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 }
                 catch (FormatException fex)
                 {
-                    _logger.LogWarning(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.ToString(payloadBytes) failed", payload.DeviceId, payload.PacketId);
+                    _logger.LogInformation(fex, "Uplink- DeviceId:{0} PacketId:{1} Convert.ToString(payloadBytes) failed", payload.DeviceId, payload.PacketId);
                 }
                 catch (JsonReaderException jrex)
                 {
-                    _logger.LogWarning(jrex, "Uplink- DeviceId:{0} PacketId:{1} JObject.Parse(payloadText) failed", payload.DeviceId, payload.PacketId);
+                    _logger.LogInformation(jrex, "Uplink- DeviceId:{0} PacketId:{1} JObject.Parse(payloadText) failed", payload.DeviceId, payload.PacketId);
                 }
             }
 
