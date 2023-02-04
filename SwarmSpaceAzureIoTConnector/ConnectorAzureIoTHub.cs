@@ -28,9 +28,37 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     using PayloadFormatter; // Short cut namespace for V1 formatters
 
-    public partial class Connector
+    partial class AzureDeviceClientCache : IAzureDeviceClientCache
     {
-        /*
+        private async Task<DeviceClient> AzureIoTHubDeviceConnectionStringConnectAsync(string deviceId, object context)
+        {
+            DeviceClient deviceClient;
+
+            if (string.IsNullOrEmpty(_azureIoTSettings.AzureIotHub.DtdlModelId))
+            {
+                _logger.LogInformation("Uplink-DeviceID:{deviceId} IoT Hub Application settings DTDL not configured", deviceId);
+
+                deviceClient = DeviceClient.CreateFromConnectionString(_azureIoTSettings.AzureIotHub.ConnectionString, deviceId, TransportSettings);
+            }
+            else
+            {
+                ClientOptions clientOptions = new ClientOptions()
+                {
+                    ModelId = _azureIoTSettings.AzureIotHub.DtdlModelId
+                };
+
+                deviceClient = DeviceClient.CreateFromConnectionString(_azureIoTSettings.AzureIotHub.ConnectionString, deviceId, TransportSettings, clientOptions);
+            }
+
+            await deviceClient.SetReceiveMessageHandlerAsync(AzureIoTHubMessageHandler, context);
+
+            await deviceClient.SetMethodDefaultHandlerAsync(AzureIoTHubClientDefaultMethodHandler, context);
+
+            await deviceClient.OpenAsync();
+
+            return deviceClient;
+        }
+
         public async Task AzureIoTHubMessageHandler(Message message, object userContext)
         {
             DeviceClient deviceClient;
@@ -42,10 +70,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 switch (_azureIoTSettings.AzureIotHub.ConnectionType)
                 {
                     case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                        deviceClient = await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
+                        deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
                         break;
                     case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                        deviceClient = await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService));
+                        deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService));
                         break;
                     default:
                         _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
@@ -138,6 +166,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 throw;
             }
         }
-        */
+
     }
 }
