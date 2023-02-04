@@ -28,7 +28,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     public partial class Connector
     {
         [Function("BumblebeeHiveCacheRefresh")]
-        public async Task<IActionResult> BumblebeeHiveCacheRefreshRun([HttpTrigger(AuthorizationLevel.Anonymous, "get")] CancellationToken cancellationToken)
+        public async Task<IActionResult> BumblebeeHiveCacheRefreshRun([HttpTrigger(AuthorizationLevel.Function, "get")] CancellationToken cancellationToken)
         {
             _logger.LogInformation("BumblebeeHiveCacheRefresh start");
 
@@ -36,6 +36,8 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             foreach (SwarmSpace.BumblebeeHiveClient.Device device in await _swarmSpaceBumblebeeHive.DeviceListAsync(cancellationToken))
             {
+                _logger.LogInformation("BumblebeeHiveCacheRefresh DeviceId:{DeviceId} DeviceName:{DeviceName}", device.DeviceId, device.DeviceName);
+
                 Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
                 {
                     // TODO seems a bit odd getting this from application settings
