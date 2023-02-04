@@ -30,6 +30,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     public partial class Connector
     {
+        /*
         public async Task AzureIoTHubMessageHandler(Message message, object userContext)
         {
             DeviceClient deviceClient;
@@ -41,10 +42,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 switch (_azureIoTSettings.AzureIotHub.ConnectionType)
                 {
                     case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                        deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context), memoryCacheEntryOptions);
+                        deviceClient = await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
                         break;
                     case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                        deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
+                        deviceClient = await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService));
                         break;
                     default:
                         _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
@@ -137,5 +138,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 throw;
             }
         }
+        */
     }
 }

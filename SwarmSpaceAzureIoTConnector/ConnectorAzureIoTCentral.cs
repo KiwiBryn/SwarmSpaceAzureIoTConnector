@@ -30,6 +30,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     public partial class Connector
     {
+        /*
         public async Task AzureIoTCentralMessageHandler(Message message, object userContext)
         {
             DeviceClient deviceClient;
@@ -40,7 +41,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                 using (message)
                 {
-                    deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
+                    deviceClient = await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService));
 
                     string methodName;
 
@@ -147,5 +148,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 throw;
             }
         }
+        */
     }
 }

@@ -28,8 +28,19 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Logging;
 
-    public partial class Connector
+    /*
+    public interface IConnectorAzureIoT
     {
+        public Task<DeviceClient> AzureIoTHubDeviceConnectionStringConnectAsync(string deviceId, object context);
+
+        public Task<DeviceClient> AzureIoTHubDeviceProvisioningServiceConnectAsync(string deviceId, object context, Models.AzureDeviceProvisioningService deviceProvisioningService);
+
+    }
+
+    public class ConnectorAzureIoT : IConnectorAzureIoT
+    {
+        ILogger<ConnectorAzureIoT> _logger;
+
         private async Task<DeviceClient> AzureIoTHubDeviceConnectionStringConnectAsync(string deviceId, object context)
         {
             DeviceClient deviceClient;
@@ -137,11 +148,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             return new MethodResponse(Encoding.ASCII.GetBytes("{\"message\":\"The SwarmSpace Connector does not support Direct Methods.\"}"), 400);
         }
 
-        private static readonly MemoryCacheEntryOptions memoryCacheEntryOptions = new MemoryCacheEntryOptions()
-        {
-            Priority = CacheItemPriority.NeverRemove
-        };
-
         private static readonly ITransportSettings[] TransportSettings = new ITransportSettings[]
         {
             new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
@@ -153,4 +159,5 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
              }
         };
     }
+    */
 }

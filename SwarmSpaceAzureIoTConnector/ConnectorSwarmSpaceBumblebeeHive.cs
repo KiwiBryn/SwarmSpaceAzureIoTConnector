@@ -27,6 +27,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     public partial class Connector
     {
+        /*
         [Function("BumblebeeHiveCacheRefresh")]
         public async Task<IActionResult> BumblebeeHiveCacheRefreshRun([HttpTrigger(AuthorizationLevel.Function, "get")] CancellationToken cancellationToken)
         {
@@ -53,10 +54,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                         switch (_azureIoTSettings.AzureIotHub.ConnectionType)
                         {
                             case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                                await _deviceClients.GetOrAddAsync<DeviceClient>(device.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(device.DeviceId.ToString(), context), memoryCacheEntryOptions);
+                                await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(device.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(device.DeviceId.ToString(), context));
                                 break;
                             case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                                await _deviceClients.GetOrAddAsync<DeviceClient>(device.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(device.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
+                                await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(device.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(device.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService));
                                 break;
                             default:
                                 _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
@@ -66,7 +67,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                         break;
 
                     case Models.ApplicationType.AzureIoTCentral:
-                        await _deviceClients.GetOrAddAsync<DeviceClient>(device.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(device.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
+                        await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(device.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(device.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService));
                         break;
 
                     default:
@@ -80,5 +81,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             return new OkResult();
         }
+        */
     }
 }

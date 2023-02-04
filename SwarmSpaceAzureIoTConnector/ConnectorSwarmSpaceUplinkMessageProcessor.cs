@@ -46,33 +46,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 DeviceId = payload.DeviceId,
             };
 
-            switch (_azureIoTSettings.ApplicationType)
-            {
-                case Models.ApplicationType.AzureIotHub:
-                    switch (_azureIoTSettings.AzureIotHub.ConnectionType)
-                    {
-                        case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                            deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(payload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(payload.DeviceId.ToString(), context), memoryCacheEntryOptions);
-                            break;
-                        case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                            deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(payload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(payload.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
-                            break;
-                        default:
-                            _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
-
-                            throw new NotImplementedException("AzureIoT Hub unsupported ConnectionType");
-                    }
-                    break;
-
-                case Models.ApplicationType.AzureIoTCentral:
-                    deviceClient = await _deviceClients.GetOrAddAsync<DeviceClient>(payload.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(payload.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
-                    break;
-
-                default:
-                    _logger.LogError("AzureIoT application type unknown {0}", _azureIoTSettings.ApplicationType);
-
-                    throw new NotImplementedException("AzureIoT unsupported ApplicationType");
-            }
+            deviceClient = await _azureDeviceClientCache.GetOrAddAsync(payload.DeviceId.ToString(), context);
 
             IFormatterUplink payloadFormatterUplink;
 

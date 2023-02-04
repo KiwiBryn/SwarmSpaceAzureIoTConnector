@@ -18,24 +18,32 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
-    using LazyCache;
-  
     public partial class Connector
     {
-        private readonly static IAppCache _deviceClients = new CachingService();
+        /// <summary>
+        /// private readonly static IAppCache _deviceClients = new CachingService();
+        /// </summary>
 
         private readonly ILogger _logger;
-        private readonly Models.AzureIoTSettings _azureIoTSettings;
-        private readonly Models.ApplicationSettings _applicationSettings;
+        private readonly IAzureDeviceClientCache _azureDeviceClientCache;
+        //private readonly Models.AzureIoTSettings _azureIoTSettings;
+        //private readonly Models.ApplicationSettings _applicationSettings;
         private readonly IPayloadFormatterCache _payloadFormatterCache;
-        private readonly ISwarmSpaceBumblebeeHive _swarmSpaceBumblebeeHive;
+        //private readonly ISwarmSpaceBumblebeeHive _swarmSpaceBumblebeeHive;
 
-        public Connector(ILoggerFactory loggerFactory, IOptions<Models.AzureIoTSettings> azureIoTSettings, IOptions<Models.ApplicationSettings> applicationSettings, ISwarmSpaceBumblebeeHive swarmSpaceBumblebeeHive, IPayloadFormatterCache payloadFormatterCache)
+        public Connector(ILoggerFactory loggerFactory, 
+            IAzureDeviceClientCache azureDeviceClientCache,
+            //IOptions<Models.AzureIoTSettings> azureIoTSettings, 
+            //IOptions<Models.ApplicationSettings> applicationSettings,
+            //ISwarmSpaceBumblebeeHive swarmSpaceBumblebeeHive, 
+            IPayloadFormatterCache payloadFormatterCache
+            )
         {
             _logger = loggerFactory.CreateLogger<Connector>();
-            _azureIoTSettings = azureIoTSettings.Value;
-            _applicationSettings = applicationSettings.Value;
-            _swarmSpaceBumblebeeHive = swarmSpaceBumblebeeHive;
+            _azureDeviceClientCache = azureDeviceClientCache;
+            //_azureIoTSettings = azureIoTSettings.Value;
+            //_applicationSettings = applicationSettings.Value;
+            //_swarmSpaceBumblebeeHive = swarmSpaceBumblebeeHive;
             _payloadFormatterCache = payloadFormatterCache;
         }
     }
