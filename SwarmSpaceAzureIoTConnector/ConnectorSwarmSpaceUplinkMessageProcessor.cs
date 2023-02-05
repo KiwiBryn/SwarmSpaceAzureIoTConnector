@@ -31,7 +31,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     using PayloadFormatter; // Short cut namespace for V1 formatters
 
-    public partial class Connector
+    partial class AzureDeviceClientCache : IAzureDeviceClientCache
     {
         [Function("UplinkMessageQueueProcessor")]
         public async Task UplinkMessageQueueProcessor([QueueTrigger("uplink", Connection = "AzureFunctionsStorage")] Models.UplinkPayloadQueueDto payload)
@@ -46,7 +46,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 DeviceId = payload.DeviceId,
             };
 
-            deviceClient = await _azureDeviceClientCache.GetOrAddAsync(payload.DeviceId.ToString(), context);
+            deviceClient = await this.GetOrAddAsync(payload.DeviceId.ToString(), context);
 
             IFormatterUplink payloadFormatterUplink;
 
