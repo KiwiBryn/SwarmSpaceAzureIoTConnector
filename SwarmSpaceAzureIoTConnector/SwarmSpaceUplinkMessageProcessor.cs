@@ -23,7 +23,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Functions.Worker;
-    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Logging;
 
     using Newtonsoft.Json;
@@ -33,8 +32,8 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     partial class AzureDeviceClientCache : IAzureDeviceClientCache
     {
-        [Function("UplinkMessageQueueProcessor")]
-        public async Task UplinkMessageQueueProcessor([QueueTrigger("uplink", Connection = "AzureFunctionsStorage")] Models.UplinkPayloadQueueDto payload)
+        [Function("SwarmSpaceUplinkMessageProcessor")]
+        public async Task SwarmSpaceUplinkMessageProcessor([QueueTrigger("uplink", Connection = "AzureFunctionsStorage")] Models.UplinkPayloadQueueDto payload)
         {
             DeviceClient deviceClient = null;
 
