@@ -37,15 +37,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         {
             DeviceClient deviceClient = null;
 
-            Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
-            {
-                OrganisationId = payload.OrganizationId,
-                //UserApplicationId = payload.UserApplicationId, deprecated
-                DeviceType = payload.DeviceType,
-                DeviceId = payload.DeviceId,
-            };
-
-            deviceClient = await this.GetOrAddAsync(payload.DeviceId.ToString(), context);
+            deviceClient = await this.GetOrAddAsync(payload.DeviceId, payload.OrganizationId, payload.DeviceType);
 
             IFormatterUplink payloadFormatterUplink;
 
@@ -98,7 +90,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             Dictionary<string, string> properties = new Dictionary<string, string>();
 
-            payloadFormatterUplink.Evaluate(properties, payload.OrganizationId, payload.DeviceId, context.DeviceType, payload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes);
+            payloadFormatterUplink.Evaluate(properties, payload.OrganizationId, payload.DeviceId, payload.DeviceType, payload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes);
 
             telemetryEvent.TryAdd("packetId", payload.PacketId);
             telemetryEvent.TryAdd("deviceType", payload.DeviceType);

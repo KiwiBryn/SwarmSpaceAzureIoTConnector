@@ -27,7 +27,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     public interface IAzureDeviceClientCache
     {
-        public Task<DeviceClient> GetOrAddAsync(string deviceId, object context);
+        public Task<DeviceClient> GetOrAddAsync(uint deviceId,uint organizationId, byte deviceType);
     }
 
     partial class AzureDeviceClientCache: IAzureDeviceClientCache
@@ -47,9 +47,17 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             _azureIoTSettings = azureIoTSettings.Value;
         }
 
-        public async Task<DeviceClient> GetOrAddAsync(string deviceId, object context)
+        public async Task<DeviceClient> GetOrAddAsync(uint deviceId, uint organizationId, byte deviceType)
         {
             DeviceClient deviceClient = null;
+
+            Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
+            {
+                OrganisationId = organizationId,
+                //UserApplicationId = payload.UserApplicationId, deprecated
+                DeviceType = deviceType,
+                DeviceId = deviceId,
+            };
 
             switch (_azureIoTSettings.ApplicationType)
             {
@@ -57,10 +65,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     switch (_azureIoTSettings.AzureIotHub.ConnectionType)
                     {
                         case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                            deviceClient =await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(deviceId, context), memoryCacheEntryOptions);
+                            deviceClient =await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(deviceId.ToString(), context), memoryCacheEntryOptions);
                             break;
                         case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                            deviceClient= await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
+                            deviceClient= await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
                             break;
                         default:
                             _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
@@ -70,7 +78,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     break;
 
                 case Models.ApplicationType.AzureIoTCentral:
-                    deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
+                    deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
                     break;
                 default:
                     _logger.LogError("AzureIoT application type unknown {0}", _azureIoTSettings.ApplicationType);
