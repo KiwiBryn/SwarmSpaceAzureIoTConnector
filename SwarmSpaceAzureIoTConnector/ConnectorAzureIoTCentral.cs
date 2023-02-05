@@ -28,9 +28,8 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     using PayloadFormatter; // Short cut namespace for V1 formatters
 
-    public partial class Connector
+    partial class AzureDeviceClientCache : IAzureDeviceClientCache
     {
-        /*
         public async Task AzureIoTCentralMessageHandler(Message message, object userContext)
         {
             DeviceClient deviceClient;
@@ -41,7 +40,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                 using (message)
                 {
-                    deviceClient = await _azureDeviceClientCache.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService));
+                    deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService));
 
                     string methodName;
 
@@ -148,6 +147,5 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 throw;
             }
         }
-        */
     }
 }
