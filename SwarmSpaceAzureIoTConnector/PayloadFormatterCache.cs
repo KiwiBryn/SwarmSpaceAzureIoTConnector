@@ -15,10 +15,9 @@
 //---------------------------------------------------------------------------------
 namespace PayloadFormatter // Additional namespace for shortening interface when usage in formatter code
 {
-    using Microsoft.Azure.Devices.Client;
+    using System.Collections.Generic;
 
     using Newtonsoft.Json.Linq;
-    using System.Collections.Generic;
 
     public interface IFormatterUplink
     {

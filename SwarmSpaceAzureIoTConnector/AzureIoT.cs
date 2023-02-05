@@ -15,16 +15,17 @@
 //---------------------------------------------------------------------------------
 namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
-    using System.Security.Cryptography;
     using System;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Threading.Tasks;
 
     using Microsoft.Azure.Devices.Client;
+    using Microsoft.Azure.Devices.Provisioning.Client;
     using Microsoft.Azure.Devices.Provisioning.Client.PlugAndPlay;
     using Microsoft.Azure.Devices.Provisioning.Client.Transport;
-    using Microsoft.Azure.Devices.Provisioning.Client;
     using Microsoft.Azure.Devices.Shared;
+
     using Microsoft.Extensions.Logging;
 
     partial class AzureDeviceClientCache : IAzureDeviceClientCache
