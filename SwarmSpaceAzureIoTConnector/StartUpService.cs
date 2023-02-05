@@ -22,13 +22,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Microsoft.Azure.Devices.Client;
-    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
-  
     public class StartUpService : BackgroundService
     {
         private readonly ILogger<StartUpService> _logger;
@@ -42,7 +39,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             _azureDeviceClientCache = azureDeviceClientCache;
             _swarmSpaceBumblebeeHive = swarmSpaceBumblebeeHive;
             _applicationSettings = applicationSettings.Value;
-            //_azureIoTSettings = azureIoTSettings.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
