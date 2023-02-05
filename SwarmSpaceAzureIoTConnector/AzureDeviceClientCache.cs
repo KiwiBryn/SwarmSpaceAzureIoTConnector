@@ -57,10 +57,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     switch (_azureIoTSettings.AzureIotHub.ConnectionType)
                     {
                         case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                            deviceClient =await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(deviceId, context));
+                            deviceClient =await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(deviceId, context), memoryCacheEntryOptions);
                             break;
                         case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                            deviceClient= await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService));
+                            deviceClient= await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService), memoryCacheEntryOptions);
                             break;
                         default:
                             _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
@@ -70,7 +70,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     break;
 
                 case Models.ApplicationType.AzureIoTCentral:
-                    deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService));
+                    deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(deviceId, (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(deviceId, context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService), memoryCacheEntryOptions);
                     break;
                 default:
                     _logger.LogError("AzureIoT application type unknown {0}", _azureIoTSettings.ApplicationType);
