@@ -106,5 +106,16 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             return new MethodResponse(Encoding.ASCII.GetBytes("{\"message\":\"The SwarmSpace Connector does not support Direct Methods.\"}"), 400);
         }
+
+        private static readonly ITransportSettings[] TransportSettings = new ITransportSettings[]
+        {
+            new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
+            {
+                AmqpConnectionPoolSettings = new AmqpConnectionPoolSettings()
+                {
+                    Pooling = true,
+                }
+             }
+        };
     }
 }

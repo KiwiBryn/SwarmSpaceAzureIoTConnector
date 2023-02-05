@@ -76,22 +76,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             return deviceClient;
         }
-
+        
 
         private static readonly MemoryCacheEntryOptions memoryCacheEntryOptions = new MemoryCacheEntryOptions()
         {
             Priority = CacheItemPriority.NeverRemove
-        };
-
-        private static readonly ITransportSettings[] TransportSettings = new ITransportSettings[]
-        {
-            new AmqpTransportSettings(TransportType.Amqp_Tcp_Only)
-            {
-                AmqpConnectionPoolSettings = new AmqpConnectionPoolSettings()
-                {
-                    Pooling = true,
-                }
-             }
         };
     }
 }
