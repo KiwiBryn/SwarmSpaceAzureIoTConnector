@@ -57,7 +57,14 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 {
                     _logger.LogInformation("BumblebeeHiveCacheRefresh DeviceId:{DeviceId} DeviceName:{DeviceName}", device.DeviceId, device.DeviceName);
 
-                    await _azureDeviceClientCache.GetOrAddAsync((uint)device.DeviceId, _applicationSettings.OrganisationId, (byte)device.DeviceType);
+                    Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
+                    {
+                        OrganisationId = _applicationSettings.OrganisationId,
+                        DeviceType = (byte)device.DeviceType,
+                        DeviceId = (uint)device.DeviceId,
+                    };
+
+                    await _azureDeviceClientCache.GetOrAddAsync(context.DeviceId, context);
                 }
 
                 _logger.LogInformation("BumblebeeHiveCacheRefresh finish");

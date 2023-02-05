@@ -27,7 +27,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     public interface IAzureDeviceClientCache
     {
-        public Task<DeviceClient> GetOrAddAsync(uint deviceId,uint organizationId, byte deviceType);
+        public Task<DeviceClient> GetOrAddAsync(uint deviceId,object context);
     }
 
     partial class AzureDeviceClientCache: IAzureDeviceClientCache
@@ -47,17 +47,9 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             _azureIoTSettings = azureIoTSettings.Value;
         }
 
-        public async Task<DeviceClient> GetOrAddAsync(uint deviceId, uint organizationId, byte deviceType)
+        public async Task<DeviceClient> GetOrAddAsync(uint deviceId, object context)
         {
             DeviceClient deviceClient = null;
-
-            Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
-            {
-                OrganisationId = organizationId,
-                //UserApplicationId = payload.UserApplicationId, deprecated
-                DeviceType = deviceType,
-                DeviceId = deviceId,
-            };
 
             switch (_azureIoTSettings.ApplicationType)
             {

@@ -37,7 +37,14 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         {
             DeviceClient deviceClient = null;
 
-            deviceClient = await this.GetOrAddAsync(payload.DeviceId, payload.OrganizationId, payload.DeviceType);
+            Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
+            {
+                OrganisationId = payload.OrganizationId,
+                DeviceType = payload.DeviceType,
+                DeviceId = payload.DeviceId,
+            };
+
+            deviceClient = await this.GetOrAddAsync(payload.DeviceId, context);
 
             IFormatterUplink payloadFormatterUplink;
 
