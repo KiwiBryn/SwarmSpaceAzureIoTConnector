@@ -28,8 +28,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
     public interface ISwarmSpaceBumblebeeHive
     {
-        public Task Login(CancellationToken cancellationToken);
-
         public Task Logout(CancellationToken cancellationToken);
 
         public Task<ICollection<Device>> DeviceListAsync(CancellationToken cancellationToken);
@@ -40,6 +38,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     public class SwarmSpaceBumblebeeHive : ISwarmSpaceBumblebeeHive
     {
         private string _token = string.Empty;
+        private DateTime _TokenActivityAtUtC = DateTime.MinValue;
         private readonly ILogger<SwarmSpaceBumblebeeHive> _logger;
         private readonly Models.SwarmBumblebeeHiveSettings _bumblebeeHiveSettings;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -50,7 +49,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 (_logger, _httpClientFactory, _bumblebeeHiveSettings) =
                 (logger, httpClientFactory, bumblebeeHiveSettings.Value);
 
-        public async Task Login(CancellationToken cancellationToken)
+        private async Task Login()
         {
             using (HttpClient httpClient = _httpClientFactory.CreateClient())
             {
@@ -66,11 +65,12 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                 _logger.LogInformation("Login:{0}", loginForm.Username);
 
-                Response response = await client.PostLoginAsync(loginForm, cancellationToken);
+                Response response = await client.PostLoginAsync(loginForm);
 
                 _logger.LogInformation("Login:{0} Token:{1}...{2}", loginForm.Username, response.Token[..5], response.Token[^5..]);
 
                 _token = response.Token;
+                _TokenActivityAtUtC = DateTime.UtcNow;
             }
         }
 
@@ -90,6 +90,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
         public async Task<ICollection<Device>> DeviceListAsync(CancellationToken cancellationToken)
         {
+            if ((_TokenActivityAtUtC + _bumblebeeHiveSettings.TokenValidFor) < DateTime.UtcNow)
+            {
+                await Login();
+            }
+
             using (HttpClient httpClient = _httpClientFactory.CreateClient())
             {
                 Client client = new Client(httpClient);
@@ -102,8 +107,13 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             }
         }
 
-        public async Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] data)
+        public async Task SendAsync( uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] data)
         {
+            if ((_TokenActivityAtUtC + _bumblebeeHiveSettings.TokenValidFor) < DateTime.UtcNow)
+            {
+                await Login();
+            }
+
             using (HttpClient httpClient = _httpClientFactory.CreateClient())
             {
                 Client client = new Client(httpClient);
