@@ -32,11 +32,13 @@ namespace PayloadFormatter // Additional namespace for shortening interface when
 
 namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
-    using System.IO;
     using System.Threading.Tasks;
 
-    using Microsoft.Extensions.Logging;
+    using Azure.Storage.Blobs;
+    using Azure.Storage.Blobs.Models;
     using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     using CSScriptLib;
@@ -55,12 +57,14 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     public class PayloadFormatterCache : IPayloadFormatterCache
     {
         private readonly ILogger<PayloadFormatterCache> _logger;
+        private readonly string _payloadFormatterConnectionString;
         private readonly Models.ApplicationSettings _applicationSettings;
         private readonly static IAppCache _payloadFormatters = new CachingService();
 
-        public PayloadFormatterCache(ILogger<PayloadFormatterCache>logger, IOptions<Models.ApplicationSettings> applicationSettings)
+        public PayloadFormatterCache(ILogger<PayloadFormatterCache>logger, IConfiguration configuration, IOptions<Models.ApplicationSettings> applicationSettings)
         {
             _logger = logger;
+            _payloadFormatterConnectionString = configuration.GetConnectionString("PayloadFormattersStorage");
             _applicationSettings = applicationSettings.Value;
         }
 
@@ -73,18 +77,18 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
         private async Task<IFormatterUplink> UplinkLoadAsync(int userApplicationId)
         {
-            string payloadformatterFilePath = $"{_applicationSettings.PayloadFormattersUplinkFilePath}\\{userApplicationId}.cs";
+            BlobClient blobClient = new BlobClient(_payloadFormatterConnectionString, _applicationSettings.PayloadFormattersUplinkContainer, $"{userApplicationId}.cs");
 
-            if (!File.Exists(payloadformatterFilePath))
-            {
-                _logger.LogInformation("PayloadFormatterUplink- UserApplicationId:{0} PayloadFormatterPath:{1} not found using default:{2}", userApplicationId, payloadformatterFilePath, _applicationSettings.PayloadFormatterUplinkDefault);
+            if (!await blobClient.ExistsAsync())
+            { 
+                _logger.LogInformation("PayloadFormatterUplink- UserApplicationId:{0} Container:{1} not found using default:{2}", userApplicationId, _applicationSettings.PayloadFormattersUplinkContainer, _applicationSettings.PayloadFormatterUplinkBlobDefault);
 
-                return CSScript.Evaluator.LoadFile<PayloadFormatter.IFormatterUplink>(_applicationSettings.PayloadFormatterUplinkDefault);
+                blobClient = new BlobClient(_payloadFormatterConnectionString, _applicationSettings.PayloadFormattersUplinkContainer, _applicationSettings.PayloadFormatterUplinkBlobDefault);
             }
 
-            _logger.LogInformation("PayloadFormatterUplink- UserApplicationId:{0} loading PayloadFormatterPath:{1}", userApplicationId, payloadformatterFilePath);
+            BlobDownloadResult downloadResult = await blobClient.DownloadContentAsync();
 
-            return CSScript.Evaluator.LoadFile<PayloadFormatter.IFormatterUplink>(payloadformatterFilePath);
+            return CSScript.Evaluator.LoadCode<PayloadFormatter.IFormatterUplink>(downloadResult.Content.ToString());
         }
 
         public async Task<IFormatterDownlink> DownlinkGetAsync(int userApplicationId)
@@ -96,18 +100,18 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
         private async Task<IFormatterDownlink> DownlinkLoadAsync(int userApplicationId)
         {
-            string payloadformatterFilePath = $"{_applicationSettings.PayloadFormattersDownlinkFilePath}\\{userApplicationId}.cs";
+            BlobClient blobClient = new BlobClient(_payloadFormatterConnectionString, _applicationSettings.PayloadFormattersDownlinkContainer, $"{userApplicationId}.cs");
 
-            if (!File.Exists(payloadformatterFilePath))
+            if (!await blobClient.ExistsAsync())
             {
-                _logger.LogInformation("PayloadFormatterDownlink- UserApplicationId:{0} PayloadFormatterPath:{1} not found using default:{2}", userApplicationId, payloadformatterFilePath, _applicationSettings.PayloadFormatterDownlinkDefault);
+                _logger.LogInformation("PayloadFormatterDownlink- UserApplicationId:{0} Container:{1} not found using default:{2}", userApplicationId, _applicationSettings.PayloadFormattersUplinkContainer, _applicationSettings.PayloadFormatterUplinkBlobDefault);
 
-                return CSScript.Evaluator.LoadFile<PayloadFormatter.IFormatterDownlink>(_applicationSettings.PayloadFormatterDownlinkDefault);
+                blobClient = new BlobClient(_payloadFormatterConnectionString, _applicationSettings.PayloadFormatterDownlinkBlobDefault, _applicationSettings.PayloadFormatterDownlinkBlobDefault);
             }
 
-            _logger.LogInformation("PayloadFormatterDownlink- UserApplicationId:{0} loading PayloadFormatterPath:{1}", userApplicationId, payloadformatterFilePath);
+            BlobDownloadResult downloadResult = await blobClient.DownloadContentAsync();
 
-            return CSScript.Evaluator.LoadFile<PayloadFormatter.IFormatterDownlink>(payloadformatterFilePath);
+            return CSScript.Evaluator.LoadCode<PayloadFormatter.IFormatterDownlink>(downloadResult.Content.ToString());
         }
 
         private static readonly MemoryCacheEntryOptions memoryCacheEntryOptions = new MemoryCacheEntryOptions()
