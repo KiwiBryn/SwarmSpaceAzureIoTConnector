@@ -11,40 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="PayloadFormattersDownlink\0.cs" />
-	  <Compile Remove="PayloadFormattersDownlink\10.cs" />
-	  <Compile Remove="PayloadFormattersDownlink\20.cs" />
-	  <Compile Remove="PayloadFormattersDownlink\30.cs" />
-	  <Compile Remove="PayloadFormattersDownlink\40.cs" />
-	  <Compile Remove="PayloadFormattersUplink\0.cs" />
-	  <Compile Remove="PayloadFormattersUplink\65535.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="PayloadFormattersDownlink\0.cs">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="PayloadFormattersDownlink\10.cs">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="PayloadFormattersDownlink\20.cs">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="PayloadFormattersDownlink\30.cs">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="PayloadFormattersDownlink\40.cs">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="PayloadFormattersUplink\0.cs">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="PayloadFormattersUplink\65535.cs">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-
-	<ItemGroup>
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
 		<PackageReference Include="CS-Script" Version="4.6.2" />
 		<PackageReference Include="LazyCache" Version="2.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />

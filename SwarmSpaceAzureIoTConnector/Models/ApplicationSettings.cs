@@ -17,11 +17,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 {
     public class ApplicationSettings
     {
-        public string PayloadFormattersUplinkFilePath { get; set; } = string.Empty;
-        public string PayloadFormatterUplinkDefault { get; set; } = string.Empty;
+        public string PayloadFormattersUplinkContainer { get; set; } = string.Empty;
+        public string PayloadFormatterUplinkBlobDefault { get; set; } = string.Empty;
 
-        public string PayloadFormattersDownlinkFilePath { get; set; } = string.Empty;
-        public string PayloadFormatterDownlinkDefault { get; set; } = string.Empty;
+        public string PayloadFormattersDownlinkContainer { get; set; } = string.Empty;
+        public string PayloadFormatterDownlinkBlobDefault { get; set; } = string.Empty;
 
         public uint OrganisationId { get; set; }
     }
