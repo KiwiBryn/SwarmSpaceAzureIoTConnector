@@ -29,7 +29,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
     {
         public Task<ICollection<Models.Device>> DeviceListAsync(CancellationToken cancellationToken);
 
-        public Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] payload, CancellationToken cancellationToken);
+        public Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] payload, CancellationToken cancellationToken = default);
     }
 
     public class SwarmSpaceBumblebeeHive : ISwarmSpaceBumblebeeHive
