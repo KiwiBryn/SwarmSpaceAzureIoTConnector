@@ -51,7 +51,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             {
                 _logger.LogInformation("BumblebeeHiveCacheRefresh start");
 
-                foreach (SwarmSpace.BumblebeeHiveClient.Device device in await _swarmSpaceBumblebeeHive.DeviceListAsync(cancellationToken))
+                foreach (Models.Device device in await _swarmSpaceBumblebeeHive.DeviceListAsync(cancellationToken))
                 {
                     _logger.LogInformation("BumblebeeHiveCacheRefresh DeviceId:{DeviceId} DeviceName:{DeviceName}", device.DeviceId, device.DeviceName);
 

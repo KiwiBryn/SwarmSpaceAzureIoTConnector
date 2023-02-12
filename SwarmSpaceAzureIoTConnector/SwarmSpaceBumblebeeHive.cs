@@ -17,22 +17,19 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 {
     using System;
     using System.Collections.Generic;
-    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
 
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
-    using devMobile.SwarmSpace.BumblebeeHiveClient;
+    using RestSharp;
 
     public interface ISwarmSpaceBumblebeeHive
     {
-        public Task Logout(CancellationToken cancellationToken);
+        public Task<ICollection<Models.Device>> DeviceListAsync(CancellationToken cancellationToken);
 
-        public Task<ICollection<Device>> DeviceListAsync(CancellationToken cancellationToken);
-
-        public Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] payload);
+        public Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] payload, CancellationToken cancellationToken);
     }
 
     public class SwarmSpaceBumblebeeHive : ISwarmSpaceBumblebeeHive
@@ -41,103 +38,100 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         private DateTime _TokenActivityAtUtC = DateTime.MinValue;
         private readonly ILogger<SwarmSpaceBumblebeeHive> _logger;
         private readonly Models.SwarmBumblebeeHiveSettings _bumblebeeHiveSettings;
-        private readonly IHttpClientFactory _httpClientFactory;
 
         public SwarmSpaceBumblebeeHive(ILogger<SwarmSpaceBumblebeeHive> logger,
-                                IHttpClientFactory httpClientFactory,
-                                IOptions<Models.SwarmBumblebeeHiveSettings> bumblebeeHiveSettings) =>
-                (_logger, _httpClientFactory, _bumblebeeHiveSettings) =
-                (logger, httpClientFactory, bumblebeeHiveSettings.Value);
+                                  IOptions<Models.SwarmBumblebeeHiveSettings> bumblebeeHiveSettings) =>
+                (_logger, _bumblebeeHiveSettings) =
+                (logger, bumblebeeHiveSettings.Value);
 
-        private async Task Login()
+        private async Task TokenRefresh(CancellationToken cancellationToken)
         {
-            using (HttpClient httpClient = _httpClientFactory.CreateClient())
+            if ((_TokenActivityAtUtC + _bumblebeeHiveSettings.TokenValidFor) < DateTime.UtcNow)
             {
-                Client client = new Client(httpClient);
+                _logger.LogInformation("Login:{0}", _bumblebeeHiveSettings.UserName);
 
-                client.BaseUrl = _bumblebeeHiveSettings.BaseUrl;
-
-                LoginForm loginForm = new LoginForm()
+                RestClientOptions restClientOptions = new RestClientOptions()
                 {
-                    Username = _bumblebeeHiveSettings.UserName,
-                    Password = _bumblebeeHiveSettings.Password,
+                    BaseUrl = new Uri(_bumblebeeHiveSettings.BaseUrl),
+                    ThrowOnAnyError = true,
                 };
 
-                _logger.LogInformation("Login:{0}", loginForm.Username);
+                RestClient client = new RestClient(restClientOptions);
 
-                Response response = await client.PostLoginAsync(loginForm);
+                RestRequest request = new RestRequest("login", Method.Post);
 
-                _logger.LogInformation("Login:{0} Token:{1}...{2}", loginForm.Username, response.Token[..5], response.Token[^5..]);
+                Models.LoginRequest loginRequest = new Models.LoginRequest()
+                {
+                    Username = _bumblebeeHiveSettings.UserName,
+                    Password = _bumblebeeHiveSettings.Password
+                };
+
+                request.AddBody(loginRequest);
+
+                var response = await client.PostAsync<Models.LoginResponse>(request, cancellationToken);
 
                 _token = response.Token;
+
+                _logger.LogInformation("Login- UserName:{0} Token:{1}...{2}", _bumblebeeHiveSettings.UserName, _token[..5], _token[^5..]);
+
                 _TokenActivityAtUtC = DateTime.UtcNow;
             }
         }
 
-        public async Task Logout(CancellationToken cancellationToken)
+        public async Task<ICollection<Models.Device>> DeviceListAsync(CancellationToken cancellationToken)
         {
-            using (HttpClient httpClient = _httpClientFactory.CreateClient())
+            await TokenRefresh(cancellationToken);
+
+            RestClientOptions restClientOptions = new RestClientOptions()
             {
-                Client client = new Client(httpClient);
+                BaseUrl = new Uri(_bumblebeeHiveSettings.BaseUrl),
+                ThrowOnAnyError = true,
+            };
 
-                client.BaseUrl = _bumblebeeHiveSettings.BaseUrl;
+            RestClient client = new RestClient(restClientOptions);
 
-                await client.GetLogoutAsync(cancellationToken);
+            RestRequest request = new RestRequest("api/v1/devices");
 
-                _logger.LogInformation("Logout: Token:{0}...{1}", _token[..5], _token[^5..]);
-            }
+            request.AddHeader("Authorization", $"bearer {_token}");
+
+            return await client.GetAsync<ICollection<Models.Device>>(request);
         }
 
-        public async Task<ICollection<Device>> DeviceListAsync(CancellationToken cancellationToken)
+        public async Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] data, CancellationToken cancellationToken)
         {
-            if ((_TokenActivityAtUtC + _bumblebeeHiveSettings.TokenValidFor) < DateTime.UtcNow)
+            await TokenRefresh(cancellationToken);
+
+            _logger.LogInformation("SendAsync: OrganizationId:{0} DeviceType:{1} DeviceId:{2} UserApplicationId:{3} Data:{4} Enabled:{5}", organisationId, deviceType, deviceId, userApplicationId, Convert.ToBase64String(data), _bumblebeeHiveSettings.DownlinkEnabled);
+
+            Models.MessageSendRequest message = new Models.MessageSendRequest()
             {
-                await Login();
-            }
+                OrganizationId = (int)organisationId,
+                DeviceType = deviceType,
+                DeviceId = (int)deviceId,
+                UserApplicationId = userApplicationId,
+                Data = data,
+            };
 
-            using (HttpClient httpClient = _httpClientFactory.CreateClient())
+            RestClientOptions restClientOptions = new RestClientOptions()
             {
-                Client client = new Client(httpClient);
+                BaseUrl = new Uri(_bumblebeeHiveSettings.BaseUrl),
+                ThrowOnAnyError = true,
+            };
 
-                client.BaseUrl = _bumblebeeHiveSettings.BaseUrl;
+            RestClient client = new RestClient(restClientOptions);
 
-                httpClient.DefaultRequestHeaders.Add("Authorization", $"bearer {_token}");
+            RestRequest request = new RestRequest("api/v1/messages", Method.Post);
 
-                return await client.GetDevicesAsync(null, null, null, null, null, null, null, null, null, cancellationToken);
-            }
-        }
+            request.AddBody(message);
 
-        public async Task SendAsync( uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] data)
-        {
-            if ((_TokenActivityAtUtC + _bumblebeeHiveSettings.TokenValidFor) < DateTime.UtcNow)
+            request.AddHeader("Authorization", $"bearer {_token}");
+
+            // To save the limited monthly allocation of mesages downlinks can be disabled
+            if (_bumblebeeHiveSettings.DownlinkEnabled)
             {
-                await Login();
-            }
+                var response = await client.PostAsync<Models.MessageSendResponse>(request, cancellationToken);
 
-            using (HttpClient httpClient = _httpClientFactory.CreateClient())
-            {
-                Client client = new Client(httpClient);
-
-                client.BaseUrl = _bumblebeeHiveSettings.BaseUrl;
-
-                httpClient.DefaultRequestHeaders.Add("Authorization", $"bearer {_token}");
-
-                UserMessage userMessage = new UserMessage()
-                {
-                    OrganizationId = (int)organisationId,
-                    DeviceType = deviceType,
-                    DeviceId = (int)deviceId,
-                    UserApplicationId = userApplicationId,
-                    Data = data,
-                };
-
-                _logger.LogInformation("SendAsync: OrganizationId:{0} DeviceType:{1} DeviceId:{2} UserApplicationId:{3} Data:{4} Enabled:{5}", organisationId, deviceType, deviceId, userApplicationId, Convert.ToBase64String(data), _bumblebeeHiveSettings.DownlinkEnabled);
-
-                // To save the limited monthly allocation of mesages downlinks can be disabled
-                if (_bumblebeeHiveSettings.DownlinkEnabled)
-                {
-                    await client.AddApplicationMessageAsync(userMessage);
-                }
+                _logger.LogInformation("SendAsync-Result:{Status} PacketId:{PacketId}", response.Status, response.PacketId);
             }
         }
     }
