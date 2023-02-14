@@ -34,29 +34,30 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         {
             DeviceClient deviceClient;
 
+            Models.AzureIoTDeviceClientContext context = (Models.AzureIoTDeviceClientContext)userContext;
+
             try
             {
-                Models.AzureIoTDeviceClientContext context = (Models.AzureIoTDeviceClientContext)userContext;
+                _logger.LogInformation("Downlink-IoT Central DeviceID:{DeviceId} LockToken:{LockToken} OrganisationId:{OrganisationId}", context.DeviceId, message.LockToken,context.OrganisationId);
 
                 using (message)
                 {
                     deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIoTCentral.DeviceProvisioningService));
 
-                    string methodName;
-
-                    // Check to see if "raw" Azure IoT hub message, no transformations just send the payload
-                    if (!message.Properties.TryGetValue("method-name", out methodName) || string.IsNullOrWhiteSpace(methodName))
+                    // Check that Message has property, method-name so it can be processed correctly
+                    if (!message.Properties.TryGetValue("method-name", out string methodName) || string.IsNullOrWhiteSpace(methodName))
                     {
-                        _logger.LogWarning("Downlink-DeviceID:{DeviceId} MessagedID:{MessageId} method-name:property missing or empty", context.DeviceId, message.MessageId);
+                        _logger.LogWarning("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} method-name:property missing or empty", context.DeviceId, message.LockToken);
 
                         await deviceClient.RejectAsync(message);
+
                         return;
                     }
 
-                    // Look up the method settings to get confirmed, port, priority, and queue
+                    // Look up the method settings to get UserApplicationId and optional downlink message payload JSON.
                     if ((_azureIoTSettings.AzureIoTCentral.Methods == null) || !_azureIoTSettings.AzureIoTCentral.Methods.TryGetValue(methodName, out Models.AzureIoTCentralMethodSetting methodSetting))
                     {
-                        _logger.LogWarning("Downlink-DeviceID:{DeviceId} MessagedID:{MessageId} method-name:{methodName} has no settings", context.DeviceId, message.MessageId, methodName);
+                        _logger.LogWarning("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} method-name:{methodName} has no settings", context.DeviceId, message.LockToken, methodName);
 
                         await deviceClient.RejectAsync(message);
 
@@ -73,7 +74,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     }
                     catch (FormatException fex)
                     {
-                        _logger.LogWarning(fex, "Uplink- DeviceId:{0} MessageId:{1} Convert.ToString(payloadBytes) failed", context.DeviceId, message.MessageId);
+                        _logger.LogWarning(fex, "Downlink-DeviceId:{DeviceId} LockToken:{LockToken} Encoding.UTF8.GetString(2) failed", context.DeviceId, message.LockToken, BitConverter.ToString(payloadBytes));
                     }
 
                     JObject payloadJson = null;
@@ -87,62 +88,63 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                         }
                         else
                         {
-                            _logger.LogWarning("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} method-name:{methodName} payload invalid {Payload}", context.DeviceId, message.LockToken, methodName, methodSetting.Payload);
+                            _logger.LogWarning("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} method-name:{methodName} IsPayloadValidJson:{Payload} failed", context.DeviceId, message.LockToken, methodName, methodSetting.Payload);
 
                             await deviceClient.RejectAsync(message);
+
                             return;
                         }
-
-                        if (!payloadText.IsPayloadEmpty())
+                    }
+                    else
+                    {
+                        if (payloadText.IsPayloadValidJson())
                         {
-                            if (payloadText.IsPayloadValidJson())
-                            {
-                                payloadJson = JObject.Parse(payloadText);
-                            }
-                            else
-                            {
-                                // Normally wouldn't use exceptions for flow control but, I can't think of a better way...
-                                try
-                                {
-                                    payloadJson = new JObject(new JProperty(methodName, JProperty.Parse(payloadText)));
-                                }
-                                catch (JsonException ex)
-                                {
-                                    payloadJson = new JObject(new JProperty(methodName, payloadText));
-                                }
-                            }
-
-                            _logger.LogInformation("Downlink-IoT Central DeviceID:{DeviceId} Method:{methodName} MessageID:{MessageId} UserAplicationId:{userApplicationId}", context.DeviceId, methodName, message.MessageId, methodSetting.UserApplicationId);
-
-                            IFormatterDownlink swarmSpaceFormatterDownlink;
-
+                            payloadJson = JObject.Parse(payloadText);
+                        }
+                        else
+                        {
+                            // Normally wouldn't use exceptions for flow control but, I can't think of a better way...
                             try
                             {
-                                swarmSpaceFormatterDownlink = await _payloadFormatterCache.DownlinkGetAsync(methodSetting.UserApplicationId);
+                                payloadJson = new JObject(new JProperty(methodName, JProperty.Parse(payloadText)));
                             }
-                            catch (CSScriptLib.CompilerException cex)
+                            catch (JsonException ex)
                             {
-                                _logger.LogInformation(cex, "Uplink-DeviceID:{deviceId} UserApplicationId:{UserApplicationId} payload formatter compilation failed", context.DeviceId, methodSetting.UserApplicationId);
-
-                                await deviceClient.RejectAsync(message);
-
-                                return;
+                                payloadJson = new JObject(new JProperty(methodName, payloadText));
                             }
-
-                            byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadJson, payloadText, payloadBytes);
-
-                            await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadData);
-
-                            await deviceClient.CompleteAsync(message);
                         }
                     }
 
+                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} Method:{methodName} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, methodName, methodSetting.UserApplicationId, BitConverter.ToString(payloadBytes));
+
+                    // Retrieve the payload formatter, if cache miss get blob using UserApplicationId, then "compile" and cache the binary.
+                    IFormatterDownlink swarmSpaceFormatterDownlink;
+
+                    try
+                    {
+                        swarmSpaceFormatterDownlink = await _payloadFormatterCache.DownlinkGetAsync(methodSetting.UserApplicationId);
+                    }
+                    catch (CSScriptLib.CompilerException cex)
+                    {
+                        _logger.LogInformation(cex, "Downlink-DeviceID:{deviceId} LockToken:{LockToken} UserApplicationId:{UserApplicationId} payload formatter compilation failed", context.DeviceId, message.LockToken, methodSetting.UserApplicationId);
+
+                        await deviceClient.RejectAsync(message);
+
+                        return;
+                    }
+
+                    byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadJson, payloadText, payloadBytes);
+
+                    await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadData);
+
                     await deviceClient.CompleteAsync(message);
+
+                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} Method:{methodName} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, methodName, methodSetting.UserApplicationId, BitConverter.ToString(payloadData));
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Downlink-MessageHandler processing failed");
+                _logger.LogError(ex, "Downlink-DeviceID:{DeviceId} LockToken:{LockToken} MessageHandler processing failed", context.DeviceId, message.LockToken);
 
                 throw;
             }
