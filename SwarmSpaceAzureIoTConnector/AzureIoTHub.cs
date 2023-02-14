@@ -36,8 +36,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             if (string.IsNullOrEmpty(_azureIoTSettings.AzureIotHub.DtdlModelId))
             {
-                _logger.LogInformation("Uplink-DeviceID:{deviceId} IoT Hub Application settings DTDL not configured", deviceId);
-
                 deviceClient = DeviceClient.CreateFromConnectionString(_azureIoTSettings.AzureIotHub.ConnectionString, deviceId, TransportSettings);
             }
             else
@@ -67,25 +65,16 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             {
                 Models.AzureIoTDeviceClientContext context = (Models.AzureIoTDeviceClientContext)userContext;
 
-                switch (_azureIoTSettings.AzureIotHub.ConnectionType)
-                {
-                    case Models.AzureIotHubConnectionType.DeviceConnectionString:
-                        deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
-                        break;
-                    case Models.AzureIotHubConnectionType.DeviceProvisioningService:
-                        deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceProvisioningServiceConnectAsync(context.DeviceId.ToString(), context, _azureIoTSettings.AzureIotHub.DeviceProvisioningService));
-                        break;
-                    default:
-                        _logger.LogError("Azure IoT Hub ConnectionType unknown {0}", _azureIoTSettings.AzureIotHub.ConnectionType);
-
-                        throw new NotImplementedException("AzureIoT Hub unsupported ConnectionType");
-                }
+                _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} LockToken:{LockToken}", context.DeviceId, message.LockToken);
 
                 using (message)
                 {
+                    deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
+
+                    // Check that Message has property, UserApplicationId so it can be processed correctly
                     if (!message.Properties.TryGetValue("UserApplicationId", out string value) || !ushort.TryParse(message.Properties["UserApplicationId"], out ushort userApplicationId))
                     {
-                        _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} MessageID:{MessageId} DeviceType:{context.DeviceType} OrganisationId:{OrganisationId} - UserApplicationId property missing or invalid", context.DeviceId, message.MessageId, context.DeviceType, context.OrganisationId);
+                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserApplicationId property missing or invalid", context.DeviceId, message.LockToken);
 
                         await deviceClient.RejectAsync(message);
 
@@ -94,7 +83,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                     if ((userApplicationId < Models.Constants.UserApplicationIdMinimum) || (userApplicationId > Models.Constants.UserApplicationIdMaximum))
                     {
-                        _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} MessageID:{MessageId} UserApplicationId:{userApplicationId} - UserApplicationId property invalid {UserApplicationIdMinimum} to {UserApplicationIdMaximum}", context.DeviceId, message.MessageId, userApplicationId, Models.Constants.UserApplicationIdMinimum, Models.Constants.UserApplicationIdMaximum);
+                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserApplicationId:{userApplicationId} UserApplicationId property invalid {UserApplicationIdMinimum} to {UserApplicationIdMaximum}", context.DeviceId, message.LockToken, userApplicationId, Models.Constants.UserApplicationIdMinimum, Models.Constants.UserApplicationIdMaximum);
 
                         await deviceClient.RejectAsync(message);
 
@@ -112,7 +101,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     }
                     catch (FormatException fex)
                     {
-                        _logger.LogWarning(fex, "Uplink- DeviceId:{0} MessageId:{1} Convert.ToString(payloadBytes) failed", context.DeviceId, message.MessageId);
+                        _logger.LogWarning(fex, "Downlink-DeviceId:{DeviceId} LockToken:{LockToken} Convert.ToString(payloadBytes) failed", context.DeviceId, message.MessageId, payloadBytes);
                     }
 
                     JObject payloadJson = null;
@@ -127,34 +116,31 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                         }
                         catch (JsonException jex)
                         {
-                            _logger.LogWarning(jex, "Uplink- DeviceId:{0} MessageId:{1} JObject failed", context.DeviceId, message.MessageId);
+                            _logger.LogWarning(jex, "Downlink-DeviceId:{DeviceId} LockToken:{LockToken} JObject.Parse failed", context.DeviceId, message.LockToken);
                         }
                     }
 
+                    // Retrieve the payload formatter, if cache miss get blob using UserApplicationId, then "compile" and cache the binary.
                     IFormatterDownlink swarmSpaceFormatterDownlink;
-
-                    byte[] payloadData;
 
                     try
                     {
                         swarmSpaceFormatterDownlink = await _payloadFormatterCache.DownlinkGetAsync(userApplicationId);
-
-                        payloadData = swarmSpaceFormatterDownlink.Evaluate(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadJson, payloadText, payloadBytes);
                     }
                     catch (CSScriptLib.CompilerException cex)
                     {
-                        _logger.LogWarning(cex, "Uplink-DeviceID:{deviceId} UserApplicationId:{UserApplicationId} payload formatter compilation failed", context.DeviceId, userApplicationId);
+                        _logger.LogWarning(cex, "Downlink-DeviceID:{deviceId} LockToken:{LockToken} UserApplicationId:{UserApplicationId} payload formatter compilation failed", context.DeviceId, message.LockToken, userApplicationId);
 
                         await deviceClient.RejectAsync(message);
 
                         return;
                     }
 
-                    _logger.LogInformation("Downlink-IoT Hub SendAsync Start DeviceID:{DeviceId} UserAplicationId:{userApplicationId}", context.DeviceId, userApplicationId);
+                    byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadJson, payloadText, payloadBytes);
 
                     await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadData);
 
-                    _logger.LogInformation("Downlink-IoT Hub SendAsync Finish DeviceID:{DeviceId} MessageID:{MessageId} UserApplicationId:{userApplicationId}", context.DeviceId, message.MessageId, userApplicationId);
+                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, userApplicationId, BitConverter.ToString(payloadData));
 
                     await deviceClient.CompleteAsync(message);
                 }
@@ -166,6 +152,5 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 throw;
             }
         }
-
     }
 }
