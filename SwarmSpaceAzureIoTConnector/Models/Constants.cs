@@ -31,7 +31,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
         public const uint DeviceIdMaximum = uint.MaxValue;
 
         public const ushort UserApplicationIdMinimum = ushort.MinValue;
-        public const ushort UserApplicationIdMaximum = ushort.MaxValue; //Swarm reserves 65000 - 65535.
+        public const ushort UserApplicationIdMaximum = 65000; //Swarm reserves 65000 - 65535.
 
         public const uint OrganisationIdMinimum = uint.MinValue;
         public const uint OrganisationIdMaximum = uint.MaxValue;
