@@ -35,6 +35,8 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Mod
         public string Client { get; set; } = string.Empty;
     }
 
+    // Assumption is that payload from SwarmHive is "correct" and that any issues with the message
+    // properties values will end up in the poison queue for a human to look at.
     public class UplinkPayloadWebDto
     {
         public ulong PacketId { get; set; }
@@ -44,7 +46,6 @@ namespace devmobile.IoT.SwarmSpaceAzureIoTConnector.SwarmSpace.UplinkWebhook.Mod
         public uint OrganizationId { get; set; }
         public string Data { get; set; } = string.Empty;
 
-        [Range(Constants.PayloadLengthMinimum, Constants.PayloadLengthMaximum)]
         public byte Len { get; set; }
         public int Status { get; set; }
 
