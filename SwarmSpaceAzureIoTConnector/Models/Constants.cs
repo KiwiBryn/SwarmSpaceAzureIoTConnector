@@ -20,21 +20,8 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
     {
         public const string ApiKeyHeaderName = "x-api-key";
 
-        public const long PacketIdMinimum = long.MinValue;
-        public const long PacketIdMaximum = long.MaxValue;
-
-        //TODO 3 bit device type. 1 = fieldBee, 2 = stratoBee, 3 = spaceBee, 4 = groundBee, 5 = Hive
-        public const byte DeviceTypeMinimum = byte.MinValue; 
-        public const byte DeviceTypeMaximum = byte.MaxValue;
-
-        public const uint DeviceIdMinimum = uint.MinValue;
-        public const uint DeviceIdMaximum = uint.MaxValue;
-
         public const ushort UserApplicationIdMinimum = ushort.MinValue;
         public const ushort UserApplicationIdMaximum = 65000; //Swarm reserves 65000 - 65535.
-
-        public const uint OrganisationIdMinimum = uint.MinValue;
-        public const uint OrganisationIdMaximum = uint.MaxValue;
 
         public const byte PayloadLengthMinimum = byte.MinValue;
         public const byte PayloadLengthMaximum = 192;
