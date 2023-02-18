@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/PayloadFormatterMaintenanceApplication/Uplink/EvalKit20230217091300.txt
+/PayloadFormatterMaintenanceApplication/Uplink/Sparkfun7.txt
