@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DownlinkSamples\**" />
+    <EmbeddedResource Remove="DownlinkSamples\**" />
+    <None Remove="DownlinkSamples\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Downlink\0.cs" />
     <Compile Remove="Downlink\10.cs" />
     <Compile Remove="Downlink\20.cs" />
@@ -57,10 +63,6 @@
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="CS-Script.Core" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DownlinkSamples\" />
   </ItemGroup>
 
 </Project>
