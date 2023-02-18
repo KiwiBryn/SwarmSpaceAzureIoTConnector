@@ -21,12 +21,12 @@ namespace PayloadFormatter // Additional namespace for shortening interface when
 
     public interface IFormatterUplink
     {
-        public void Evaluate(Dictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes);
+        public JObject Evaluate(IDictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes);
     }
 
     public interface IFormatterDownlink
     {
-        public byte[] Evaluate(Dictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes);
+        public byte[] Evaluate(IDictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes);
     }
 }
 
@@ -155,7 +155,19 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnectorPayloadFormatterMaintenanceAp
                 uplinkJson = new JObject();
             }
 
-            JObject telemetryEvent = new JObject();
+            JObject telemetryEvent;
+
+            // Transform the byte and optional text and JSON payload
+            try
+            {
+                telemetryEvent = evalulatorUplink.Evaluate(properties, options.OrganizationId, options.DeviceId, options.DeviceType, options.UserApplicationId, uplinkJson, uplinkText, uplinkBytes);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"evalulatorUplink.Evaluate failed Exception:{ex}");
+                return;
+            }
+
             telemetryEvent.TryAdd("deviceType", options.DeviceType);
             telemetryEvent.TryAdd("DeviceID", options.DeviceId);
             telemetryEvent.TryAdd("OrganizationId", options.OrganizationId);
@@ -179,17 +191,6 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnectorPayloadFormatterMaintenanceAp
             if (string.IsNullOrWhiteSpace(options.Client))
             {
                 telemetryEvent.TryAdd("Client", options.Client);
-            }
-
-            // Transform the byte and optional text and JSON payload
-            try
-            {
-                evalulatorUplink.Evaluate(properties, options.OrganizationId, options.DeviceId, options.DeviceType, options.UserApplicationId, telemetryEvent, uplinkJson, uplinkText, uplinkBytes);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"evalulatorUplink.Evaluate failed Exception:{ex}");
-                return;
             }
 
             Console.WriteLine("Properties");
