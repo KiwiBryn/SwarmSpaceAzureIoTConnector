@@ -30,9 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Downlink\Sparkfun7.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Uplink\EvalKit20230217091300.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
