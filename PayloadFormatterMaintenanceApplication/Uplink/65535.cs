@@ -5,8 +5,10 @@ using Newtonsoft.Json.Linq;
 
 public class FormatterUplink : PayloadFormatter.IFormatterUplink
 {
-    public void Evaluate(Dictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject telemetryEvent, JObject payloadJson, string payloadText, byte[] payloadBytes)
+    public JObject Evaluate(IDictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes)
     {
+        JObject telemetryEvent = new JObject();
+
         if ((payloadText != "") && (payloadJson != null))
         {
             JObject location = new JObject();
@@ -36,5 +38,7 @@ public class FormatterUplink : PayloadFormatter.IFormatterUplink
         telemetryEvent.Add("RSSI", payloadJson.GetValue("r"));
 
         properties.Add("iothub-creation-time-utc", DateTimeOffset.FromUnixTimeSeconds((long)payloadJson.GetValue("d")).ToString("s", CultureInfo.InvariantCulture));
+
+        return telemetryEvent;
     }
 }
