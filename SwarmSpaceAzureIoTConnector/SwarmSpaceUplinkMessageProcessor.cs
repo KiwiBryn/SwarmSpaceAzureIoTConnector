@@ -93,11 +93,9 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 }
             }
 
-            JObject telemetryEvent = new JObject();
-
             Dictionary<string, string> properties = new Dictionary<string, string>();
 
-            payloadFormatterUplink.Evaluate(properties, payload.OrganizationId, payload.DeviceId, payload.DeviceType, payload.UserApplicationId, telemetryEvent, payloadJson, payloadText, payloadBytes);
+            JObject telemetryEvent = payloadFormatterUplink.Evaluate(properties, payload.OrganizationId, payload.DeviceId, payload.DeviceType, payload.UserApplicationId, payloadJson, payloadText, payloadBytes);
 
             telemetryEvent.TryAdd("packetId", payload.PacketId);
             telemetryEvent.TryAdd("deviceType", payload.DeviceType);
