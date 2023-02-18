@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PayloadFormatterMaintenanceApplication": {
+      "commandName": "Project",
+      "commandLineArgs": "-d downlink -u 0 -i 8577 -t 1 -p EvalKit20230217091300.txt -o 65760"
+    }
+  }
+}

@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Downlink\0.cs" />
+    <Compile Remove="Downlink\10.cs" />
+    <Compile Remove="Downlink\20.cs" />
+    <Compile Remove="Downlink\30.cs" />
+    <Compile Remove="Downlink\40.cs" />
+    <Compile Remove="Uplink\0.cs" />
+    <Compile Remove="Uplink\65535.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Uplink\EvalKit20230217091300.txt" />
+    <None Remove="Uplink\Sparkfun7.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Uplink\EvalKit20230217091300.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Downlink\0.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Downlink\10.cs" />
+    <Content Include="Downlink\20.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Downlink\30.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Downlink\40.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Uplink\0.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Uplink\65535.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Uplink\Sparkfun7.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="CS-Script.Core" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DownlinkSamples\" />
+  </ItemGroup>
+
+</Project>
