@@ -61,12 +61,13 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         {
             DeviceClient deviceClient;
 
+            Models.AzureIoTDeviceClientContext context = (Models.AzureIoTDeviceClientContext)userContext;
+
+            _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} LockToken:{LockToken}", context.DeviceId, message.LockToken);
+
+
             try
             {
-                Models.AzureIoTDeviceClientContext context = (Models.AzureIoTDeviceClientContext)userContext;
-
-                _logger.LogInformation("Downlink-IoT Hub DeviceID:{DeviceId} LockToken:{LockToken}", context.DeviceId, message.LockToken);
-
                 using (message)
                 {
                     deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
