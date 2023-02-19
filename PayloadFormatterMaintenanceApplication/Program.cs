@@ -13,23 +13,6 @@
 // limitations under the License.
 //
 //---------------------------------------------------------------------------------
-namespace PayloadFormatter // Additional namespace for shortening interface when usage in formatter code
-{
-    using System.Collections.Generic;
-
-    using Newtonsoft.Json.Linq;
-
-    public interface IFormatterUplink
-    {
-        public JObject Evaluate(IDictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes);
-    }
-
-    public interface IFormatterDownlink
-    {
-        public byte[] Evaluate(IDictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes);
-    }
-}
-
 namespace devMobile.IoT.SwarmSpaceAzureIoTConnectorPayloadFormatterMaintenanceApplication
 {
     using System;
