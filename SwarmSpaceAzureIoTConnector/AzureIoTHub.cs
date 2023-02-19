@@ -68,83 +68,80 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             try
             {
-                using (message)
+                deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
+
+                // Check that Message has property, UserApplicationId so it can be processed correctly
+                if (!message.Properties.TryGetValue("UserApplicationId", out string value) || !ushort.TryParse(message.Properties["UserApplicationId"], out ushort userApplicationId))
                 {
-                    deviceClient = await _azuredeviceClients.GetOrAddAsync<DeviceClient>(context.DeviceId.ToString(), (ICacheEntry x) => AzureIoTHubDeviceConnectionStringConnectAsync(context.DeviceId.ToString(), context));
+                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserApplicationId property missing or invalid", context.DeviceId, message.LockToken);
 
-                    // Check that Message has property, UserApplicationId so it can be processed correctly
-                    if (!message.Properties.TryGetValue("UserApplicationId", out string value) || !ushort.TryParse(message.Properties["UserApplicationId"], out ushort userApplicationId))
-                    {
-                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserApplicationId property missing or invalid", context.DeviceId, message.LockToken);
+                    await deviceClient.RejectAsync(message);
 
-                        await deviceClient.RejectAsync(message);
-
-                        return;
-                    }
-
-                    if ((userApplicationId < Models.Constants.UserApplicationIdMinimum) || (userApplicationId > Models.Constants.UserApplicationIdMaximum))
-                    {
-                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserApplicationId:{userApplicationId} UserApplicationId property invalid {UserApplicationIdMinimum} to {UserApplicationIdMaximum}", context.DeviceId, message.LockToken, userApplicationId, Models.Constants.UserApplicationIdMinimum, Models.Constants.UserApplicationIdMaximum);
-
-                        await deviceClient.RejectAsync(message);
-
-                        return;
-                    }
-
-                    byte[] payloadBytes = message.GetBytes();
-
-                    string payloadText = string.Empty;
-
-                    // Normally wouldn't use exceptions for flow control but, I can't think of a better way...
-                    try
-                    {
-                        payloadText = Encoding.UTF8.GetString(payloadBytes);
-                    }
-                    catch (FormatException fex)
-                    {
-                        _logger.LogWarning(fex, "Downlink-DeviceId:{DeviceId} LockToken:{LockToken} Convert.ToString(payloadBytes) failed", context.DeviceId, message.MessageId, payloadBytes);
-                    }
-
-                    JObject payloadJson = null;
-
-                    if (payloadText != string.Empty)
-                    {
-                        try
-                        {
-                            JContainer.Parse(payloadText);
-
-                            payloadJson = JObject.Parse(payloadText);
-                        }
-                        catch (JsonException jex)
-                        {
-                            _logger.LogWarning(jex, "Downlink-DeviceId:{DeviceId} LockToken:{LockToken} JObject.Parse failed", context.DeviceId, message.LockToken);
-                        }
-                    }
-
-                    // Retrieve the payload formatter, if cache miss get blob using UserApplicationId, then "compile" and cache the binary.
-                    IFormatterDownlink swarmSpaceFormatterDownlink;
-
-                    try
-                    {
-                        swarmSpaceFormatterDownlink = await _payloadFormatterCache.DownlinkGetAsync(userApplicationId);
-                    }
-                    catch (CSScriptLib.CompilerException cex)
-                    {
-                        _logger.LogWarning(cex, "Downlink-DeviceID:{deviceId} LockToken:{LockToken} UserApplicationId:{UserApplicationId} payload formatter compilation failed", context.DeviceId, message.LockToken, userApplicationId);
-
-                        await deviceClient.RejectAsync(message);
-
-                        return;
-                    }
-
-                    byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(message.Properties, context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadJson, payloadText, payloadBytes);
-
-                    await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadData);
-
-                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, userApplicationId, BitConverter.ToString(payloadData));
-
-                    await deviceClient.CompleteAsync(message);
+                    return;
                 }
+
+                if ((userApplicationId < Models.Constants.UserApplicationIdMinimum) || (userApplicationId > Models.Constants.UserApplicationIdMaximum))
+                {
+                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserApplicationId:{userApplicationId} UserApplicationId property invalid {UserApplicationIdMinimum} to {UserApplicationIdMaximum}", context.DeviceId, message.LockToken, userApplicationId, Models.Constants.UserApplicationIdMinimum, Models.Constants.UserApplicationIdMaximum);
+
+                    await deviceClient.RejectAsync(message);
+
+                    return;
+                }
+
+                byte[] payloadBytes = message.GetBytes();
+
+                string payloadText = string.Empty;
+
+                // Normally wouldn't use exceptions for flow control but, I can't think of a better way...
+                try
+                {
+                    payloadText = Encoding.UTF8.GetString(payloadBytes);
+                }
+                catch (FormatException fex)
+                {
+                    _logger.LogWarning(fex, "Downlink-DeviceId:{DeviceId} LockToken:{LockToken} Convert.ToString(payloadBytes) failed", context.DeviceId, message.MessageId, payloadBytes);
+                }
+
+                JObject payloadJson = null;
+
+                if (payloadText != string.Empty)
+                {
+                    try
+                    {
+                        JContainer.Parse(payloadText);
+
+                        payloadJson = JObject.Parse(payloadText);
+                    }
+                    catch (JsonException jex)
+                    {
+                        _logger.LogWarning(jex, "Downlink-DeviceId:{DeviceId} LockToken:{LockToken} JObject.Parse failed", context.DeviceId, message.LockToken);
+                    }
+                }
+
+                // Retrieve the payload formatter, if cache miss get blob using UserApplicationId, then "compile" and cache the binary.
+                IFormatterDownlink swarmSpaceFormatterDownlink;
+
+                try
+                {
+                    swarmSpaceFormatterDownlink = await _payloadFormatterCache.DownlinkGetAsync(userApplicationId);
+                }
+                catch (CSScriptLib.CompilerException cex)
+                {
+                    _logger.LogWarning(cex, "Downlink-DeviceID:{deviceId} LockToken:{LockToken} UserApplicationId:{UserApplicationId} payload formatter compilation failed", context.DeviceId, message.LockToken, userApplicationId);
+
+                    await deviceClient.RejectAsync(message);
+
+                    return;
+                }
+
+                byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(message.Properties, context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadJson, payloadText, payloadBytes);
+
+                await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadData);
+
+                _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, userApplicationId, BitConverter.ToString(payloadData));
+
+                await deviceClient.CompleteAsync(message);
             }
             catch (Exception ex)
             {
