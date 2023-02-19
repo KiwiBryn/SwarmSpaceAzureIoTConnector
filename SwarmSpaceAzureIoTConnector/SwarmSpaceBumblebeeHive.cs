@@ -56,21 +56,22 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     ThrowOnAnyError = true,
                 };
 
-                RestClient client = new RestClient(restClientOptions);
-
-                RestRequest request = new RestRequest("login", Method.Post);
-
-                Models.LoginRequest loginRequest = new Models.LoginRequest()
+                using (RestClient client = new RestClient(restClientOptions))
                 {
-                    Username = _bumblebeeHiveSettings.UserName,
-                    Password = _bumblebeeHiveSettings.Password
-                };
+                    RestRequest request = new RestRequest("login", Method.Post);
 
-                request.AddBody(loginRequest);
+                    Models.LoginRequest loginRequest = new Models.LoginRequest()
+                    {
+                        Username = _bumblebeeHiveSettings.UserName,
+                        Password = _bumblebeeHiveSettings.Password
+                    };
 
-                var response = await client.PostAsync<Models.LoginResponse>(request, cancellationToken);
+                    request.AddBody(loginRequest);
 
-                _token = response.Token;
+                    var response = await client.PostAsync<Models.LoginResponse>(request, cancellationToken);
+
+                    _token = response.Token;
+                }
 
                 _logger.LogInformation("Login- UserName:{0} Token:{1}...{2}", _bumblebeeHiveSettings.UserName, _token[..5], _token[^5..]);
 
@@ -88,13 +89,14 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 ThrowOnAnyError = true,
             };
 
-            RestClient client = new RestClient(restClientOptions);
+            using (RestClient client = new RestClient(restClientOptions))
+            {
+                RestRequest request = new RestRequest("api/v1/devices");
 
-            RestRequest request = new RestRequest("api/v1/devices");
+                request.AddHeader("Authorization", $"bearer {_token}");
 
-            request.AddHeader("Authorization", $"bearer {_token}");
-
-            return await client.GetAsync<ICollection<Models.Device>>(request);
+                return await client.GetAsync<ICollection<Models.Device>>(request, cancellationToken);
+            }
         }
 
         public async Task SendAsync(uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, byte[] data, CancellationToken cancellationToken)
@@ -118,20 +120,22 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 ThrowOnAnyError = true,
             };
 
-            RestClient client = new RestClient(restClientOptions);
-
-            RestRequest request = new RestRequest("api/v1/messages", Method.Post);
-
-            request.AddBody(message);
-
-            request.AddHeader("Authorization", $"bearer {_token}");
-
-            // To save the limited monthly allocation of mesages downlinks can be disabled
-            if (_bumblebeeHiveSettings.DownlinkEnabled)
+            using (RestClient client = new RestClient(restClientOptions))
             {
-                var response = await client.PostAsync<Models.MessageSendResponse>(request, cancellationToken);
 
-                _logger.LogInformation("SendAsync-Result:{Status} PacketId:{PacketId}", response.Status, response.PacketId);
+                RestRequest request = new RestRequest("api/v1/messages", Method.Post);
+
+                request.AddBody(message);
+
+                request.AddHeader("Authorization", $"bearer {_token}");
+
+                // To save the limited monthly allocation of mesages downlinks can be disabled
+                if (_bumblebeeHiveSettings.DownlinkEnabled)
+                {
+                    var response = await client.PostAsync<Models.MessageSendResponse>(request, cancellationToken);
+
+                    _logger.LogInformation("SendAsync-Result:{Status} PacketId:{PacketId}", response.Status, response.PacketId);
+                }
             }
         }
     }
