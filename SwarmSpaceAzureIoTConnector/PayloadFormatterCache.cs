@@ -89,7 +89,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
             {
                 _logger.LogInformation("PayloadFormatterDownlink- UserApplicationId:{0} Container:{1} not found using default:{2}", userApplicationId, _applicationSettings.PayloadFormattersUplinkContainer, _applicationSettings.PayloadFormatterUplinkBlobDefault);
 
-                blobClient = new BlobClient(_payloadFormatterConnectionString, _applicationSettings.PayloadFormatterDownlinkBlobDefault, _applicationSettings.PayloadFormatterDownlinkBlobDefault);
+                blobClient = new BlobClient(_payloadFormatterConnectionString, _applicationSettings.PayloadFormattersDownlinkContainer, _applicationSettings.PayloadFormatterDownlinkBlobDefault);
             }
 
             BlobDownloadResult downloadResult = await blobClient.DownloadContentAsync();
