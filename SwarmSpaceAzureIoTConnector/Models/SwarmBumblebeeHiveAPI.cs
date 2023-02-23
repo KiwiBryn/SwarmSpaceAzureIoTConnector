@@ -17,20 +17,20 @@
 //---------------------------------------------------------------------------------
 namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
 {
-    using System.Text.Json.Serialization;
+    using Newtonsoft.Json;
 
     internal class LoginRequest
     {
-        [JsonPropertyName("username")]
+        [JsonProperty("username", Required = Required.Always)]
         public string Username { get; set; }
 
-        [JsonPropertyName("password")]
+        [JsonProperty("password", Required = Required.Always)]
         public string Password { get; set; }
     }
 
     internal class LoginResponse
     {
-        [JsonPropertyName("token")]
+        [JsonProperty("token", Required = Required.Always)]
         public string Token { get; set; }
     }
 
@@ -40,32 +40,32 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
         /// <summary>
         /// 3 bit device type. 1 = fieldBee, 2 = stratoBee, 3 = spaceBee, 4 = groundBee, 5 = Hive
         /// </summary>
-        [JsonPropertyName("deviceType")]
+        [Newtonsoft.Json.JsonProperty("deviceType")]
         public int DeviceType { get; set; }
 
         /// <summary>
         /// 18 bit device id
         /// </summary>
-        [JsonPropertyName("deviceId")]
+        [Newtonsoft.Json.JsonProperty("deviceId")]
         public int DeviceId { get; set; }
 
         /// <summary>
         /// Device name. By default, looks like F-0x00010 for deviceType = 1 and deviceId = 16
         /// </summary>
-        [JsonPropertyName("deviceName")]
+        [Newtonsoft.Json.JsonProperty("deviceName")]
         public string DeviceName { get; set; }
 
         /* These might be useful in future
         /// <summary>
         /// Status of device
         /// </summary>
-        //[JsonPropertyName("status")]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Status { get; set; }
 
         /// <summary>
         /// Whether or not this device can receive return messages from the hive. Only applies to field devices.
         /// </summary>
-        //[JsonPropertyName("twoWayEnabled")]
+        [Newtonsoft.Json.JsonProperty("twoWayEnabled", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool TwoWayEnabled { get; set; } = false;
         */
     }
@@ -75,31 +75,31 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
         /// <summary>
         /// Swarm device type
         /// </summary>
-        [JsonPropertyName("deviceType")]
+        [Newtonsoft.Json.JsonProperty("deviceType", Required = Newtonsoft.Json.Required.Always)]
         public int DeviceType { get; set; }
 
         /// <summary>
         /// Swarm device ID
         /// </summary>
-        [JsonPropertyName("deviceId")]
+        [Newtonsoft.Json.JsonProperty("deviceId", Required = Newtonsoft.Json.Required.Always)]
         public int DeviceId { get; set; }
 
         /// <summary>
         /// Application ID
         /// </summary>
-        [JsonPropertyName("userApplicationId")]
+        [Newtonsoft.Json.JsonProperty("userApplicationId", Required = Newtonsoft.Json.Required.Always)]
         public int UserApplicationId { get; set; }
 
         /// <summary>
         /// Organization ID
         /// </summary>
-        [JsonPropertyName("organizationId")]
+        [Newtonsoft.Json.JsonProperty("organizationId", Required = Newtonsoft.Json.Required.Always)]
         public int OrganizationId { get; set; }
 
         /// <summary>
         /// Base64 encoded data string
         /// </summary>
-        [JsonPropertyName("data")]
+        [Newtonsoft.Json.JsonProperty("data", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public byte[] Data { get; set; }
     }
@@ -109,13 +109,14 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector.Models
         /// <summary>
         /// Swarm packet ID.
         /// </summary>
-        [JsonPropertyName("packetId")]
+        [Newtonsoft.Json.JsonProperty("packetId", Required = Newtonsoft.Json.Required.Always)]
         public long PacketId { get; set; }
 
         /// <summary>
         /// Submission status, "OK" or "ERROR" with a description of the error.
         /// </summary>
-        [JsonPropertyName("status")]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Status { get; set; }
     }
 }
