@@ -39,7 +39,9 @@
     <Content Include="Downlink\0.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Downlink\10.cs" />
+    <Content Include="Downlink\10.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Downlink\20.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -68,6 +70,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IPayloadFormatter\IPayloadFormatter.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Downlink\FanMedium.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

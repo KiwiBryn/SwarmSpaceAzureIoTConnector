@@ -191,10 +191,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnectorPayloadFormatterMaintenanceAp
             Dictionary<string, string> properties = new Dictionary<string, string>();
 
             string formatterFolder = Path.Combine(Environment.CurrentDirectory, "downlink");
-            Console.WriteLine($"Downlink- uplinkFormatterFolder:{formatterFolder}");
+            Console.WriteLine($"Downlink- uplinkFormatterFolder: {formatterFolder}");
 
             string formatterFile = Path.Combine(formatterFolder, $"{options.UserApplicationId}.cs");
-            Console.WriteLine($"Downlink- UserApplicationId: {options.UserApplicationId} Formatter file:{formatterFile}");
+            Console.WriteLine($"Downlink- UserApplicationId: {options.UserApplicationId}");
+            Console.WriteLine($"Downlink- Payload formatter file: {formatterFile}");
 
             PayloadFormatter.IFormatterDownlink evalulator;
             try
@@ -213,7 +214,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnectorPayloadFormatterMaintenanceAp
 
             try
             {
-                uplinkBytes = Convert.FromBase64String(File.ReadAllText(payloadFilename));
+                uplinkBytes = File.ReadAllBytes(payloadFilename);
             }
             catch (DirectoryNotFoundException dex)
             {
