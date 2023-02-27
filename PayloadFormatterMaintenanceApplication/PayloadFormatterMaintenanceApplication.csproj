@@ -20,6 +20,7 @@
     <Compile Remove="Downlink\30.cs" />
     <Compile Remove="Downlink\40.cs" />
     <Compile Remove="Uplink\0.cs" />
+    <Compile Remove="Uplink\65002.cs" />
     <Compile Remove="Uplink\65535.cs" />
   </ItemGroup>
 
@@ -30,6 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Uplink\65002.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Uplink\EvalKit20230217091300.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -74,6 +78,12 @@
 
   <ItemGroup>
     <None Update="Downlink\FanMedium.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Uplink\AssetTrackerRunning.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Uplink\AssetTrackerStartup.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

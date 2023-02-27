@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /PayloadFormatterMaintenanceApplication/Uplink/EvalKit20230217091300.txt
 /PayloadFormatterMaintenanceApplication/Uplink/Sparkfun7.txt
 /PayloadFormatterMaintenanceApplication/Downlink/Sparkfun7.txt
+/PayloadFormatterMaintenanceApplication/Uplink/AssetTrackerRunning.txt
+/PayloadFormatterMaintenanceApplication/Uplink/AssetTrackerStartup.txt
