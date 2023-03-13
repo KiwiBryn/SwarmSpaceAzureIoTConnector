@@ -136,6 +136,10 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                     _logger.LogInformation("SendAsync-Result:{Status} PacketId:{PacketId}", response.Status, response.PacketId);
                 }
+                else
+                {
+                    _logger.LogInformation("SendAsync-Result:Not Sent");
+                }
             }
         }
     }
