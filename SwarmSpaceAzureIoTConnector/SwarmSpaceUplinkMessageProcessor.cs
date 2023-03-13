@@ -35,7 +35,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
         [Function("SwarmSpaceUplinkMessageProcessor")]
         public async Task SwarmSpaceUplinkMessageProcessor([QueueTrigger("uplink", Connection = "AzureFunctionsStorage")] Models.UplinkPayloadQueueDto payload)
         {
-            DeviceClient deviceClient = null;
+            DeviceClient deviceClient;
 
             Models.AzureIoTDeviceClientContext context = new Models.AzureIoTDeviceClientContext()
             {
@@ -59,7 +59,7 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 throw new InvalidProgramException("Uplink payload formatter invalid or not found");
             }
 
-            byte[] payloadBytes = null;
+            byte[] payloadBytes;
 
             try
             {
@@ -85,11 +85,11 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 }
                 catch (FormatException fex)
                 {
-                    _logger.LogInformation("Uplink- DeviceId:{0} PacketId:{1} Encoding.UTF8.GetString(payloadBytes) failed", payload.DeviceId, payload.PacketId);
+                    _logger.LogInformation(fex,"Uplink- DeviceId:{0} PacketId:{1} Encoding.UTF8.GetString(payloadBytes) failed", payload.DeviceId, payload.PacketId);
                 }
                 catch (JsonReaderException jrex)
                 {
-                    _logger.LogInformation("Uplink- DeviceId:{0} PacketId:{1} JObject.Parse(payloadText) failed", payload.DeviceId, payload.PacketId);
+                    _logger.LogInformation(jrex, "Uplink- DeviceId:{0} PacketId:{1} JObject.Parse(payloadText) failed", payload.DeviceId, payload.PacketId);
                 }
             }
 
@@ -126,7 +126,18 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                 ioTHubmessage.Properties.TryAdd("OrganizationId", payload.OrganizationId.ToString());
                 ioTHubmessage.Properties.TryAdd("Client", payload.Client);
 
-                await deviceClient.SendEventAsync(ioTHubmessage);
+                try
+                {
+                    await deviceClient.SendEventAsync(ioTHubmessage);
+                }
+                catch (Exception sex)
+                {
+                    _logger.LogWarning(sex, "Uplink- DeviceId:{0} PacketId:{1} SendEventAsync failed", payload.DeviceId, payload.PacketId);
+
+                    await this.Remove(payload.DeviceId);
+
+                    throw;
+                }
             };
 
             _logger.LogInformation("Uplink-DeviceID:{deviceId} PacketId:{1} SendEventAsync success", payload.DeviceId, payload.PacketId);
