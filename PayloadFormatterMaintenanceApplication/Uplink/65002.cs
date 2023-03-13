@@ -9,39 +9,29 @@ public class FormatterUplink : PayloadFormatter.IFormatterUplink
     {
         JObject telemetryEvent = new JObject();
 
-        if ((payloadText != "") && (payloadJson != null))
+        if (payloadJson != null)
         {
             JObject location = new JObject();
 
-            location.Add("lat", payloadJson.GetValue("lt"));
-            location.Add("lon", payloadJson.GetValue("ln"));
-            location.Add("alt", payloadJson.GetValue("al"));
+            if ((payloadJson.GetValue("lt").Value<double>() != 0.0) && (payloadJson.GetValue("ln").Value<double>() != 0.0))
+            {
+                location.Add("lat", payloadJson.GetValue("lt"));
+                location.Add("lon", payloadJson.GetValue("ln"));
+                location.Add("alt", payloadJson.GetValue("al"));
 
-            telemetryEvent.Add("DeviceLocation", location);
+                telemetryEvent.Add("DeviceLocation", location);
+
+                // Course & speed
+                telemetryEvent.Add("Course", payloadJson.GetValue("hd"));
+                telemetryEvent.Add("Speed", payloadJson.GetValue("sp"));
+            }
+
+            telemetryEvent.Add("BatteryVoltage", payloadJson.GetValue("bv"));
+
+            telemetryEvent.Add("RSSI", payloadJson.GetValue("rs"));
+
+            properties.Add("iothub-creation-time-utc", DateTimeOffset.FromUnixTimeSeconds((long)payloadJson.GetValue("dt")).ToString("s", CultureInfo.InvariantCulture));
         }
-
-        // Course & speed
-        telemetryEvent.Add("Course", payloadJson.GetValue("hd"));
-        telemetryEvent.Add("Speed", payloadJson.GetValue("sp"));
-
-        // Battery voltage & current
-
-        telemetryEvent.Add("BatteryVoltage", payloadJson.GetValue("bv"));
-
-        /*
-        telemetryEvent.Add("BatteryCurrent", payloadJson.GetValue("bi"));
-
-        // Solar voltage
-        telemetryEvent.Add("SolarVoltage", payloadJson.GetValue("sv"));
-
-        // Modem current 
-        telemetryEvent.Add("ModemCurrent", payloadJson.GetValue("ti"));
-        */
-
-        // RSSI
-        telemetryEvent.Add("RSSI", payloadJson.GetValue("rs"));
-
-        properties.Add("iothub-creation-time-utc", DateTimeOffset.FromUnixTimeSeconds((long)payloadJson.GetValue("dt")).ToString("s", CultureInfo.InvariantCulture));
 
         return telemetryEvent;
     }
