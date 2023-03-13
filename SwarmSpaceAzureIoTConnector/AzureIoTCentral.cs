@@ -134,12 +134,20 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
                     }
 
                     byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(message.Properties, context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadJson, payloadText, payloadBytes);
+                    
+                    if ((payloadData != null ) && (payloadData.Length > 0))
+                    {
+                        await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadData);
 
-                    await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, methodSetting.UserApplicationId, payloadData);
+                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} Method:{methodName} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, methodName, methodSetting.UserApplicationId, BitConverter.ToString(payloadData));
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} Method:{methodName} UserAplicationId:{userApplicationId} Payload:", context.DeviceId, message.LockToken, methodName, methodSetting.UserApplicationId);
+                    }
 
                     await deviceClient.CompleteAsync(message);
 
-                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} Method:{methodName} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, methodName, methodSetting.UserApplicationId, BitConverter.ToString(payloadData));
                 }
             }
             catch (Exception ex)
