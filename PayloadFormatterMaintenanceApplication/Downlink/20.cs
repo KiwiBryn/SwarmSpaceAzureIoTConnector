@@ -8,6 +8,12 @@ public class FormatterDownlink : PayloadFormatter.IFormatterDownlink
     public byte[] Evaluate(IDictionary<string, string> properties, uint organisationId, uint deviceId, byte deviceType, ushort userApplicationId, JObject payloadJson, string payloadText, byte[] payloadBytes)
     {
         double? min = payloadJson.Value<double?>("TemperatureMin");
+        double? max = payloadJson.Value<double?>("TemperatureMax");
+
+        if (min.HasValue && max.HasValue)
+        {
+            return new byte[] { };
+        }
 
         if (min.HasValue)
         {
@@ -19,8 +25,6 @@ public class FormatterDownlink : PayloadFormatter.IFormatterDownlink
 
             return result;
         }
-
-        double? max = payloadJson.Value<double?>("TemperatureMax");
 
         if (max.HasValue)
         {
