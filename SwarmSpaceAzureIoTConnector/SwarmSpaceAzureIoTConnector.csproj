@@ -11,7 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.15.0" />
 		<PackageReference Include="CS-Script" Version="4.6.2" />
 		<PackageReference Include="LazyCache" Version="2.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
@@ -21,15 +21,15 @@
 		<PackageReference Include="Microsoft.Azure.Devices.Provisioning.Client" Version="1.19.2" />
 		<PackageReference Include="Microsoft.Azure.Devices.Provisioning.Transport.Amqp" Version="1.16.4" />
 		<PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
-		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.1" />
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.1.0" />
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.7.0" />
-		<PackageReference Include="Microsoft.Azure.WebJobs.Logging.ApplicationInsights" Version="3.0.33" />
+		<PackageReference Include="Microsoft.Azure.WebJobs.Logging.ApplicationInsights" Version="3.0.34" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-		<PackageReference Include="RestSharp" Version="108.0.3" />
+		<PackageReference Include="RestSharp" Version="109.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
