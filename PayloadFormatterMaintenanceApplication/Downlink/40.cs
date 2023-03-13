@@ -8,11 +8,11 @@ public class FormatterDownlink : PayloadFormatter.IFormatterDownlink
     {
         byte? status = payloadJson.Value<byte?>("FanStatus");
 
-        if ( status.HasValue ) 
-        { 
-            return new byte[] { status.Value };
+        if (!status.HasValue)
+        {
+            return new byte[] { };
         }
 
-        return new byte[]{};
+        return new byte[] { status.Value };
     }
 }
