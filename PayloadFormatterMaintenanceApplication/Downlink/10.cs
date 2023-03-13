@@ -9,11 +9,11 @@ public class FormatterDownlink : PayloadFormatter.IFormatterDownlink
     {
         bool? light = payloadJson.Value<bool?>("Light");
 
-        if (light.HasValue)
+        if (!light.HasValue)
         {
-            return new byte[] { Convert.ToByte(light.Value) };
+            return new byte[] { };
         }
 
-        return new byte[] { };
+        return new byte[] { Convert.ToByte(light.Value) };
     }
 }
