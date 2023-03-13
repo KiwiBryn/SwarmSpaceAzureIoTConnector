@@ -80,7 +80,15 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
             return deviceClient;
         }
-        
+
+        public async Task Remove(uint deviceId)
+        {
+            if (_azuredeviceClients.TryGetValue<DeviceClient>(deviceId.ToString(), out DeviceClient deviceClient))
+            {
+                await deviceClient.DisposeAsync();
+            }
+        }
+
         private static readonly MemoryCacheEntryOptions memoryCacheEntryOptions = new MemoryCacheEntryOptions()
         {
             Priority = CacheItemPriority.NeverRemove
