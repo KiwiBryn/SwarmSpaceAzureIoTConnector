@@ -139,9 +139,16 @@ namespace devMobile.IoT.SwarmSpaceAzureIoTConnector.Connector
 
                     byte[] payloadData = swarmSpaceFormatterDownlink.Evaluate(message.Properties, context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadJson, payloadText, payloadBytes);
 
-                    await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadData);
+                    if ((payloadData != null) && (payloadData.Length > 0))
+                    {
+                        await _swarmSpaceBumblebeeHive.SendAsync(context.OrganisationId, context.DeviceId, context.DeviceType, userApplicationId, payloadData);
 
-                    _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, userApplicationId, BitConverter.ToString(payloadData));
+                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserAplicationId:{userApplicationId} Payload:{4}", context.DeviceId, message.LockToken, userApplicationId, BitConverter.ToString(payloadData));
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Downlink-DeviceID:{DeviceId} LockToken:{LockToken} UserAplicationId:{userApplicationId} Payload:", context.DeviceId, message.LockToken, userApplicationId);
+                    }
 
                     await deviceClient.CompleteAsync(message);
                 }
