@@ -12,17 +12,17 @@ public class FormatterDownlink : PayloadFormatter.IFormatterDownlink
 
         double? max = payloadJson.Value<double?>("max");
 
-        if (min.HasValue && max.HasValue)
+        if (!min.HasValue || !max.HasValue)
         {
-            byte[] result = new byte[16];
-
-            BitConverter.GetBytes(min.Value).CopyTo(result, 0);
-
-            BitConverter.GetBytes(max.Value).CopyTo(result, 8);
-
-            return result;
+            return new byte[] { };
         }
 
-        return new byte[] { };
+        byte[] result = new byte[16];
+
+        BitConverter.GetBytes(min.Value).CopyTo(result, 0);
+
+        BitConverter.GetBytes(max.Value).CopyTo(result, 8);
+
+        return result;
     }
 }
