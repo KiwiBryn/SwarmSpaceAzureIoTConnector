@@ -9,7 +9,27 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwarmSpaceAzureIoTConnector
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PayloadFormatterMaintenanceApplication", "PayloadFormatterMaintenanceApplication\PayloadFormatterMaintenanceApplication.csproj", "{F5BF826C-C7C1-4D01-BB4D-68CA1244458C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPayloadFormatter", "IPayloadFormatter\IPayloadFormatter.csproj", "{93977CAE-C3DF-4038-9DB6-EBEB4950039E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IPayloadFormatter", "IPayloadFormatter\IPayloadFormatter.csproj", "{93977CAE-C3DF-4038-9DB6-EBEB4950039E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{F3BDA3F3-F375-49D8-97D8-DDE76EB19706}"
+	ProjectSection(SolutionItems) = preProject
+		Images\SwarmM138Modem.jpg = Images\SwarmM138Modem.jpg
+		Images\SwarmSpaceAzureIoTHubConnectorV4.png = Images\SwarmSpaceAzureIoTHubConnectorV4.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SwamEvaluationKit", "SwamEvaluationKit", "{7A52F8C1-7614-4267-9F9C-0277D41AC814}"
+	ProjectSection(SolutionItems) = preProject
+		Images\SwamrEvaluationKit\SwarmEvaluationKitWhite.png = Images\SwamrEvaluationKit\SwarmEvaluationKitWhite.png
+		Images\SwamrEvaluationKit\SwarmEvaluationKitPayloadDocumation.PNG = Images\SwamrEvaluationKit\SwarmEvaluationKitPayloadDocumation.PNG
+		Images\SwamrEvaluationKit\SwarmEvalutationKitHiveUplinkMessagesAndMessage.PNG = Images\SwamrEvaluationKit\SwarmEvalutationKitHiveUplinkMessagesAndMessage.PNG
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SwarmAssetTracker", "SwarmAssetTracker", "{FF091430-CC36-4F6F-87A7-CB72C4D6FDF9}"
+	ProjectSection(SolutionItems) = preProject
+		Images\SwarmAssetTracker\SwarmAssetTrackerRichardA.png = Images\SwarmAssetTracker\SwarmAssetTrackerRichardA.png
+		Images\SwarmAssetTracker\SwarmAssetTrackerSamplePayload.PNG = Images\SwarmAssetTracker\SwarmAssetTrackerSamplePayload.PNG
+		Images\SwarmAssetTracker\SwarmAssetTrackerWhite.png = Images\SwarmAssetTracker\SwarmAssetTrackerWhite.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +56,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7A52F8C1-7614-4267-9F9C-0277D41AC814} = {F3BDA3F3-F375-49D8-97D8-DDE76EB19706}
+		{FF091430-CC36-4F6F-87A7-CB72C4D6FDF9} = {F3BDA3F3-F375-49D8-97D8-DDE76EB19706}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {64A625E5-F20A-47F3-BE61-6F294CB106AA}
