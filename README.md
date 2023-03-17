@@ -14,7 +14,7 @@ The repo has the source code for the series of blog posts written as I built the
 8. [Uplink Payload formatter caching and files](https://blog.devmobile.co.nz/2023/01/03/swarm-space-uplink-payload-formatter-caching-and-files/)
 9. [Uplink Payload Message Creation Time](https://blog.devmobile.co.nz/2023/01/04/swarm-space-uplink-payload-message-creation-time/)
 10. [Uplink Payload Formatters revisited](https://blog.devmobile.co.nz/2023/01/09/swarm-space-uplink-payload-formatters-revisited/)
-11. [Uplink Payload Startup Problem](http://blog.devmobile.co.nz/2023/01/13/swarm-space-uplink-payload-startup/))
+11. [Uplink Payload Startup Problem](http://blog.devmobile.co.nz/2023/01/13/swarm-space-uplink-payload-startup/)
 12. [Underlying Architecture Revisited](http://blog.devmobile.co.nz/2023/01/19/swarm-space-underlying-architecture-revisited/) 
 13. [Uplink with Azure Functions or WebAPI](https://blog.devmobile.co.nz/2023/01/21/swarm-space-uplink-with-azure-functions-or-webapi/)
 14. [Uplink with WebAPI Revisited again](https://blog.devmobile.co.nz/2023/02/01/swarm-space-uplink-with-webapi-revisited-again/)
