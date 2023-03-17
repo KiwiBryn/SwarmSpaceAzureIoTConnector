@@ -17,11 +17,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{F3BDA3
 		Images\SwarmSpaceAzureIoTHubConnectorV4.png = Images\SwarmSpaceAzureIoTHubConnectorV4.png
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SwamEvaluationKit", "SwamEvaluationKit", "{7A52F8C1-7614-4267-9F9C-0277D41AC814}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SwarmEvaluationKit", "SwarmEvaluationKit", "{7A52F8C1-7614-4267-9F9C-0277D41AC814}"
 	ProjectSection(SolutionItems) = preProject
 		Images\SwamrEvaluationKit\SwarmEvaluationKitWhite.png = Images\SwamrEvaluationKit\SwarmEvaluationKitWhite.png
+		Images\SwamrEvaluationKit\SwarmEvaluationKitHiveUplinkMessagesAndMessage.PNG = Images\SwamrEvaluationKit\SwarmEvaluationKitHiveUplinkMessagesAndMessage.PNG
 		Images\SwamrEvaluationKit\SwarmEvaluationKitPayloadDocumation.PNG = Images\SwamrEvaluationKit\SwarmEvaluationKitPayloadDocumation.PNG
-		Images\SwamrEvaluationKit\SwarmEvalutationKitHiveUplinkMessagesAndMessage.PNG = Images\SwamrEvaluationKit\SwarmEvalutationKitHiveUplinkMessagesAndMessage.PNG
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SwarmAssetTracker", "SwarmAssetTracker", "{FF091430-CC36-4F6F-87A7-CB72C4D6FDF9}"
